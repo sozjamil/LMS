@@ -1,0 +1,46 @@
+import axios from 'axios';
+import { refreshToken } from './auth';
+
+const BASE_URL = 'http://localhost:8000'; // Adjust based on your API URL
+const api = axios.create({
+  baseURL: BASE_URL,
+});
+
+api.interceptors.request.use((config) => {
+  const accessToken = localStorage.getItem('accessToken');
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If the token has expired and refresh token exists, try refreshing
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+      const refreshTokenValue = localStorage.getItem('refreshToken');
+      if (refreshTokenValue) {
+        try {
+          const newAccessToken = await refreshToken(refreshTokenValue);
+          localStorage.setItem('accessToken', newAccessToken);
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return api(originalRequest);
+        } catch (err) {
+          console.error("Failed to refresh token:", err);
+          // Optionally log the user out if refreshing fails
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default api;
