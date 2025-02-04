@@ -10,7 +10,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await api.get('/api/courses/'); // Use the API instance to get courses
+        const response = await api.get('/api/courses'); // Use the API instance to get courses
         setCourses(response.data);
         setLoading(false);
       } catch (error) {

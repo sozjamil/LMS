@@ -7,6 +7,7 @@ import useAuth from './hooks/useAuth';
 import CreateCoursePage from './pages/CreateCoursePage';
 import CourseManagementPage from './pages/CourseManagementPage';
 import Register from './pages/Register';
+import CourseEditPage from './pages/CourseEditPage';
 
 function App() {
   const { user } = useAuth();
@@ -17,12 +18,11 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/course/:id" element={<CoursePage />} />
-        <Route
-          path="/login"
-          element={user ? <Navigate to="/" /> : <LoginPage />}
-        />        
+        <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />        
         <Route path="/create-course" element={<CreateCoursePage />} />
         <Route path="/manage-courses" element={<CourseManagementPage />} />
+        <Route path="/manage/course/:id" element={<CourseEditPage />} />
+
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<div>Page not found</div>} />
 

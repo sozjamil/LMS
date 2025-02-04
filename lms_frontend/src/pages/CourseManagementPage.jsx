@@ -1,20 +1,20 @@
-// src/pages/CourseManagementPage.js
-
 import React, { useEffect, useState } from 'react';
-import api from '../utils/api'; // Import the api instance
+import api from '../utils/api';  // Assuming this is your axios instance
+import { useNavigate } from 'react-router-dom';
 
 const CourseManagementPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate(); // Get the navigate function
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await api.get('/api/courses/'); // Use the api instance to get courses
+        const response = await api.get('/api/instructor/courses/');  // Fetch instructor's courses
         setCourses(response.data);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching courses:', error);
+      } finally {
         setLoading(false);
       }
     };
@@ -22,16 +22,23 @@ const CourseManagementPage = () => {
     fetchCourses();
   }, []);
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+  if (loading) return <p>Loading...</p>;
 
+  const handleEditCourse = (courseId) => {
+    navigate(`/manage/course/${courseId}`);
+  };
   return (
     <div>
-      <h1>Course Management</h1>
+      <h1>Instructor Courses</h1>
       <ul>
-        {courses.map((course) => (
-          <li key={course.id}>{course.title}</li>
+        {courses.map(course => (
+          <li key={course.id}>
+            <button onClick={() => handleEditCourse(course.id)}>
+              {course.title}
+            </button>
+            <p>{course.description}</p>
+            {/* Add buttons for editing and deleting */}
+          </li>
         ))}
       </ul>
     </div>

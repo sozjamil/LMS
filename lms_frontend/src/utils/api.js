@@ -11,6 +11,9 @@ api.interceptors.request.use((config) => {
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
+  // Check Headers
+  console.log('Request Headers:', config.headers);
+
   return config;
 });
 
@@ -36,6 +39,11 @@ api.interceptors.response.use(
         } catch (err) {
           console.error("Failed to refresh token:", err);
           // Optionally log the user out if refreshing fails
+          // If the refresh token fails, clear tokens and redirect to login
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          window.location.href = '/login';
+          return Promise.reject(refreshError);
         }
       }
     }
