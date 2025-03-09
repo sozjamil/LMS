@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CourseDetailView, CourseList, InstructorCoursesView, LessonList, CreateCourseView, LessonCreateView, LessonUpdateView
+from .views import CourseDetailView, CourseList, InstructorCoursesView, LessonList, CreateCourseView, LessonCreateView, LessonUpdateView, UserProfileView
 from .views import RegisterUserView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
@@ -10,6 +10,7 @@ urlpatterns = [
     path('courses/<int:course_id>/lessons/', LessonCreateView.as_view(), name='lesson-create'),
     
     path('instructor/courses/', InstructorCoursesView.as_view(), name='instructor-courses'),
+    path('profile/', UserProfileView.as_view(), name='user-profile'),
 
 
     path('lessons/', LessonList.as_view(), name='lesson-list'),

@@ -6,7 +6,7 @@ from .models import Course, Lesson, Profile
 
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.ChoiceField(choices=Profile.ROLE_CHOICES)
+    role = serializers.CharField(source='profile.role', read_only=True)
 
     class Meta:
         model = User

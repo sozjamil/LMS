@@ -25,10 +25,11 @@ from django.http import JsonResponse
 from .aws_s3 import upload_to_s3
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from django.core.files.uploadedfile import TemporaryUploadedFile
+from rest_framework.generics import RetrieveUpdateAPIView
 
 class IsInstructor(BasePermission):
     def has_permission(self, request, view):
-        return request.user.profile.role == 'instructor'
+        return hasattr(request.user, 'profile') and request.user.profile.role == 'instructor'
     
 
 # class TokenObtainPairView(APIView):
@@ -132,8 +133,6 @@ class RegisterUserView(APIView):
         print("Serializer Errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-
 class CourseDetailView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]  # To handle file uploads
@@ -141,8 +140,8 @@ class CourseDetailView(APIView):
     def get(self, request, course_id):
         try:
             course = Course.objects.get(id=course_id)
-            if course.instructor != request.user:
-                return Response({'error': 'Unauthorized'}, status=403)
+            # if course.instructor != request.user:
+            #     return Response({'error': 'Unauthorized'}, status=403)
 
             serializer = CourseSerializer(course)
             return Response(serializer.data)
@@ -221,6 +220,22 @@ class InstructorCoursesView(APIView):
             for course in courses
         ]
         return Response(course_data)
+
+class UserProfileView(RetrieveUpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # Return the authenticated user
+        return self.request.user
+
+    def perform_update(self, serializer):
+            # Update the user's profile role if provided
+            role = self.request.data.get('role')
+            if role and hasattr(self.request.user, 'profile'):
+                self.request.user.profile.role = role
+                self.request.user.profile.save()
+            serializer.save()
 
 
 # class RegisterUserView(APIView):

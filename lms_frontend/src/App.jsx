@@ -8,6 +8,9 @@ import CreateCoursePage from './pages/CreateCoursePage';
 import CourseManagementPage from './pages/CourseManagementPage';
 import Register from './pages/Register';
 import CourseEditPage from './pages/CourseEditPage';
+import UserProfilePage from './pages/UserProfilePage';
+// import ProtectedRoute from "./components/ProtectedRoute"; 
+import Navbar from "./components/Navbar"; // Import the Navbar component
 
 function App() {
   const { user } = useAuth();
@@ -15,6 +18,8 @@ function App() {
 
   return (
     <Router>
+      <Navbar /> {/* Add the Navbar */}
+
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/course/:id" element={<CoursePage />} />
@@ -22,7 +27,8 @@ function App() {
         <Route path="/create-course" element={<CreateCoursePage />} />
         <Route path="/manage-courses" element={<CourseManagementPage />} />
         <Route path="/manage/course/:id" element={<CourseEditPage />} />
-
+        
+        <Route path="/profile" element={<UserProfilePage /> }/>
         <Route path="/register" element={<Register />} />
         <Route path="*" element={<div>Page not found</div>} />
 
