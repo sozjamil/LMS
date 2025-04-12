@@ -6,8 +6,8 @@ from django.shortcuts import render
 from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 import urllib
-from .models import Course, Lesson, Profile, Enrollment
-from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer
+from .models import Course, Lesson, Profile, Enrollment, Review
+from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer, ReviewSerializer
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -26,6 +26,8 @@ from .aws_s3 import upload_to_s3
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from rest_framework.generics import RetrieveUpdateAPIView
+
+from rest_framework import serializers
 
 class IsInstructor(BasePermission):
     def has_permission(self, request, view):
@@ -275,11 +277,19 @@ class EnrollInCourseView(APIView):
         else:
             return Response({'message': 'Already enrolled'})
     
-# class RegisterUserView(APIView):
-#     def post(self, request):
-#         serializer = UserSerializer(data=request.data)
-#         if serializer.is_valid():
-#             user = serializer.save()
-#             return Response({'id': user.id, 'username': user.username}, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)from django.shortcuts import render
+    
+class CourseReviewListCreateView(generics.ListCreateAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
+    def get_queryset(self):
+        course_id = self.kwargs['course_id']
+        return Review.objects.filter(course__id=course_id)
+
+    def perform_create(self, serializer):
+        course_id = self.kwargs['course_id']
+        user = self.request.user
+        # Ensure user is enrolled
+        if not Enrollment.objects.filter(course_id=course_id, student=user).exists():
+            raise serializers.ValidationError("You must be enrolled to leave a review.")
+        serializer.save(course_id=course_id, student=user)

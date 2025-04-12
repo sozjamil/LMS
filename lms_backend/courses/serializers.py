@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from rest_framework import serializers
-from .models import Course, Lesson, Profile, Enrollment
+from .models import Course, Lesson, Profile, Enrollment, Review
 
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -94,3 +94,12 @@ class EnrollmentSerializer(serializers.ModelSerializer):
         model = Enrollment
         fields = ['id', 'course', 'student', 'enrolled_at']
         read_only_fields = ['student', 'enrolled_at']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    student_username = serializers.CharField(source='student.username', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = ['id','student_username', 'rating', 'comment', 'created_at']
+        read_only_fields = ['student','course', 'created_at']

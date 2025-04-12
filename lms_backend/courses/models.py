@@ -27,7 +27,8 @@ def create_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_profile(sender, instance, **kwargs):
     instance.profile.save()
-    
+
+# a model for managing courses   
 class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
@@ -39,6 +40,7 @@ class Course(models.Model):
     def __str__(self):
         return self.title
 
+# a model for lessons 
 class Lesson(models.Model):
     course = models.ForeignKey(Course, related_name='lessons', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
@@ -50,6 +52,7 @@ class Lesson(models.Model):
     def __str__(self):
         return self.title
 
+# a model for enrollment where students can enroll in a class
 class Enrollment(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -57,3 +60,17 @@ class Enrollment(models.Model):
     
     class Meta:
             unique_together = ['student', 'course']  # Prevent double-enrollment
+
+# a model for review where users can leave a review 
+class Review(models.Model):
+    course = models.ForeignKey('Course', on_delete=models.CASCADE, related_name='reviews')
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField()  # from 1 to 5
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('course', 'student')  # Prevent duplicate reviews
+
+    def __str__(self):
+        return f"{self.course.title} - {self.student.username} ({self.rating})"
