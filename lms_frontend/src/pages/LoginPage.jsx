@@ -3,8 +3,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api'; // Import the api instance
+import useAuth from '../hooks/useAuth';
 
 const LoginPage = () => {
+  const { login } = useAuth(); // from context
   const navigate = useNavigate();
   const [username, setUsername] = useState('');  // Changed from email to username
   const [password, setPassword] = useState('');
@@ -24,6 +26,12 @@ const LoginPage = () => {
       // Store the tokens in localStorage
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
+
+      // Simulate login API call
+      const Token = 'accessToken'; // Replace this with real API response
+
+      // Save to context (this will trigger Navbar update!)
+      login(Token);
 
       // Redirect to the homepage or course management page after successful login
       navigate('/');

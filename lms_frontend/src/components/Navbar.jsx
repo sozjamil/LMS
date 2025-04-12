@@ -1,27 +1,28 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import useAuth from '../hooks/useAuth'; // Adjust the path
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
-  const isAuthenticated = !!localStorage.getItem("accessToken"); // Check if the user is authenticated
 
+  const { isAuthenticated, logout } = useAuth(); // Uses context
+  
   return (
-    <nav className="bg-blue-500 p-4">
-      <ul className="flex space-x-4">
-        <li>
-          <Link to="/" className="text-white hover:text-gray-200">
-            Home
-          </Link>
-        </li>
+    <nav >
+      <div >
+        <Link to="/" >My App</Link>
+      </div>
+      <ul >
+        <li><Link to="/" >Home</Link></li>
         {isAuthenticated && (
-          <li>
-            <Link to="/profile" className="text-white hover:text-gray-200">
-              Profile
-            </Link>
-          </li>
+          <>
+            <li><Link to="/profile">Profile</Link>
+            </li>
+            <li><button onClick={logout}>Logout</button></li>
+          </>
         )}
         {!isAuthenticated && (
           <li>
-            <Link to="/login" className="text-white hover:text-gray-200">
+            <Link to="/login" >
               Login
             </Link>
           </li>
@@ -30,5 +31,4 @@ const Navbar = () => {
     </nav>
   );
 };
-
 export default Navbar;

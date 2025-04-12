@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from rest_framework import serializers
-from .models import Course, Lesson, Profile
+from .models import Course, Lesson, Profile, Enrollment
 
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -36,7 +36,20 @@ class LessonSerializer(serializers.ModelSerializer):
         model = Lesson
         fields = ['id', 'title', 'content', 'video_url']
         read_only_fields = ['video_url']  # Problem solve Mark video_url as read-only 
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        enrolled = self.context.get('enrolled', False)  #Pass this from the view
 
+
+         # Only show content if enrolled
+        if not enrolled:
+            data['content'] = None
+            data['video_url'] = None
+
+        return data
+    
 class CourseSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)  # Problem solve add `read_only=True`
 
@@ -75,3 +88,9 @@ class CourseSerializer(serializers.ModelSerializer):
             lesson.delete()
 
         return instance
+    
+class EnrollmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Enrollment
+        fields = ['id', 'course', 'student', 'enrolled_at']
+        read_only_fields = ['student', 'enrolled_at']

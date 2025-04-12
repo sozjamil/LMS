@@ -3,11 +3,11 @@ import traceback
 from django.conf import settings
 from django.shortcuts import render
 
-from rest_framework import generics
+from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 import urllib
-from .models import Course, Lesson, Profile
-from .serializers import CourseSerializer, LessonSerializer
+from .models import Course, Lesson, Profile, Enrollment
+from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -51,12 +51,12 @@ class IsInstructor(BasePermission):
 class CourseList(generics.ListCreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
 
 class LessonList(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
 
 class CreateCourseView(generics.CreateAPIView):
     queryset = Course.objects.all()
@@ -134,18 +134,44 @@ class RegisterUserView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CourseDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     parser_classes = [MultiPartParser, FormParser]  # To handle file uploads
 
     def get(self, request, course_id):
         try:
             course = Course.objects.get(id=course_id)
+           
+            # Only check enrollment if user is authenticated
+            enrolled = False
+            
+            if request.user.is_authenticated:
+            #    print("User:", request.user) #test
+            #    print("Is authenticated:", request.user.is_authenticated)
+            #    print("All enrollments:", Enrollment.objects.all())
+               enrolled = Enrollment.objects.filter(course=course, student=request.user).exists()
+            #    print("Enrolled:", enrolled) #test
+
             # if course.instructor != request.user:
             #     return Response({'error': 'Unauthorized'}, status=403)
 
-            serializer = CourseSerializer(course)
-            return Response(serializer.data)
+            serializer = CourseSerializer(
+                course,
+                context={'request': request, 'enrolled': enrolled}
+            )
+        
+            course_data = serializer.data
 
+            # If not enrolled, hide content and videos
+            if not enrolled:
+                for lesson in course_data.get('lessons', []):
+                    lesson['content'] = 'Enroll to see the content'
+                    lesson['video_url'] = None
+
+            return Response(course_data)
+            # import json #test
+            # print("Final course data:", json.dumps(course_data, indent=2))
+            # return Response(course_data)
+        
         except Course.DoesNotExist:
             return Response({'error': 'Course not found'}, status=404)
 
@@ -237,7 +263,18 @@ class UserProfileView(RetrieveUpdateAPIView):
                 self.request.user.profile.save()
             serializer.save()
 
+class EnrollInCourseView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request, course_id):
+        course = Course.objects.get(id=course_id)
+        enrollment, created = Enrollment.objects.get_or_create(student=request.user, course=course)
+
+        if created:
+            return Response({'message': 'Enrolled successfully'})
+        else:
+            return Response({'message': 'Already enrolled'})
+    
 # class RegisterUserView(APIView):
 #     def post(self, request):
 #         serializer = UserSerializer(data=request.data)

@@ -8,18 +8,20 @@ const CoursePage = () => {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   useEffect(() => {
     const fetchCourse = async () => {
       try {
         const response = await api.get(`/api/courses/${id}`);
         setCourse(response.data);
+
+        // Check if actual content is present to decide enrollment
+        const hasContent = response.data.lessons?.[0]?.content !== 'Enroll to see the content';
+        setIsEnrolled(hasContent);
+
       } catch (err) {
-        if (err.response?.status === 403 || err.response?.status === 401) {
-          setError('You are not authorized to view this course.');
-        } else {
-          setError('Error fetching course.');
-        }
+        setError('Error fetching course.');
       } finally {
         setLoading(false);
       }
@@ -27,6 +29,15 @@ const CoursePage = () => {
 
     fetchCourse();
   }, [id]);
+
+  const handleEnroll = async () => {
+    try {
+      await api.post(`/api/courses/${id}/enroll/`);
+      window.location.reload(); // refresh to see real content
+    } catch (err) {
+      console.error('Enrollment failed:', err);
+    }
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -46,9 +57,11 @@ const CoursePage = () => {
       <h1>{course.title}</h1>
       <p>{course.description}</p>
       <h2>Lessons</h2>
+      {!isEnrolled && (
+       <button onClick={handleEnroll}>Enroll to Unlock Full Content</button>)}
       <ul>
         {course.lessons.map((lesson) => (
-          <li key={lesson.id} style={{ marginBottom: '20px' }}>
+          <li key={lesson.id} >
             <h3>{lesson.title}</h3>
             <p>{lesson.content}</p>
             {lesson.video_url ? (
@@ -63,7 +76,9 @@ const CoursePage = () => {
                 Your browser does not support the video tag.
               </video>
             ) : (
-              <p style={{ color: 'red', fontStyle: 'italic' }}>No video available</p>
+              <p style={{ color: 'red', fontStyle: 'italic' }}>
+                No video available
+              </p>
             )}
           </li>
         ))}
