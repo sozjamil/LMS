@@ -97,9 +97,9 @@ class EnrollmentSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    student_username = serializers.CharField(source='student.username', read_only=True)
+    username = serializers.CharField(source='student.username', read_only=True)
 
     class Meta:
         model = Review
-        fields = ['id','student_username', 'rating', 'comment', 'created_at']
-        read_only_fields = ['student','course', 'created_at']
+        fields = ['id','username', 'rating', 'comment', 'created_at']
+        read_only_fields = ['student','username','course', 'created_at']
