@@ -18,11 +18,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add role if profile exists
         if hasattr(self.user, 'profile'):
             data['role'] = self.user.profile.role
-            data['isInstructor'] = self.user.profile.role == 'instructor'
-        else:
-            data['role'] = None
-            data['isInstructor'] = False
-
         return data
     
 # User serializer
@@ -34,10 +29,10 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'password', 'role']
         extra_kwargs = {'password': {'write_only': True}}
 
-    def create(self, validated_data):
-        role = validated_data.pop('role', 'student')
+    def create(self, validated_data): 
+        role = validated_data.pop('role', 'student') # default to 'student' if not provided
         user = User.objects.create_user(**validated_data)
-        print("User created with validated data:", validated_data)
+        print("User created with validated data:", validated_data) # testing
 
         # Check if a Profile already exists before creating one
         if not hasattr(user, 'profile'):

@@ -260,25 +260,24 @@ class UserProfileView(RetrieveUpdateAPIView):
         # Return the authenticated user
         return self.request.user
 
-    def perform_update(self, serializer):
-            # Update the user's profile role if provided
-            role = self.request.data.get('role')
-            if role and hasattr(self.request.user, 'profile'):
-                self.request.user.profile.role = role
-                self.request.user.profile.save()
-            serializer.save()
-
 class EnrollInCourseView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, course_id):
+        user = request.user
         course = Course.objects.get(id=course_id)
-        enrollment, created = Enrollment.objects.get_or_create(student=request.user, course=course)
-
+        enrollment, created = Enrollment.objects.get_or_create(student=request.user, course=course)    
+        
+        
+        if user.profile.role == 'instructor': # Check if the user is an instructor
+            return Response({'detail': 'Instructors cannot enroll in courses.'}, status=status.HTTP_403_FORBIDDEN)
+                
         if created:
             return Response({'message': 'Enrolled successfully'})
         else:
             return Response({'message': 'Already enrolled'})
+        
+        
     
     
 class CourseReviewListCreateView(generics.ListCreateAPIView):
