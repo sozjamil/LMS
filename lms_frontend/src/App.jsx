@@ -13,7 +13,7 @@ import Register from './pages/Register';
 import CourseEditPage from './pages/CourseEditPage';
 import UserProfilePage from './pages/UserProfilePage';
 import Logout from './pages/logout';
-
+import MyCoursesPage from'./pages/MyCoursesPage.jsx'
 // Step 13: Course Reviews
 
 function App() {
@@ -27,10 +27,12 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/course/:id" element={<CoursePage />} />
-          <Route path="/login" element={user ? <Navigate to="/" /> : <LoginPage />} />        
+          <Route path="/login" element={<LoginPage />} />        
 
           <Route element={<ProtectedRoute />}> 
             <Route path="/profile" element={<UserProfilePage /> }/>
+            <Route path="/my-courses" element={<MyCoursesPage />} />
+            
             <Route path="/create-course" element={<CreateCoursePage />} />
             <Route path="/manage-courses" element={<CourseManagementPage />} />
             <Route path="/manage/course/:id" element={<CourseEditPage />} />

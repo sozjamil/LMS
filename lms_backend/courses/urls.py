@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CourseDetailView, CourseList, CourseReviewListCreateView, EnrollInCourseView, EnrolledCoursesView, InstructorCoursesView, LessonList, CreateCourseView, LessonCreateView, LessonUpdateView, UserProfileView
+from .views import CourseDetailView, CourseList, CourseReviewListCreateView, EnrollInCourseView, EnrolledCoursesView, InstructorCoursesView, LessonList, CreateCourseView, LessonCreateView, LessonUpdateView, ProfilePictureUploadView, UserProfileView
 from .views import RegisterUserView
 from rest_framework_simplejwt.views import  TokenRefreshView #, TokenObtainPairView
 from .views import CustomTokenObtainPairView 
@@ -29,6 +29,7 @@ urlpatterns = [
     
     path('token/', CustomTokenObtainPairView.as_view(), name='token-obtain'),
 
+    path('profile/upload-picture/', ProfilePictureUploadView.as_view(), name='upload-profile-picture'),
 
    
 ]

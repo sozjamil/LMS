@@ -307,3 +307,13 @@ class EnrolledCoursesView(APIView):
             for course in enrolled_courses
         ]
         return Response(course_data)
+    
+class ProfilePictureUploadView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        profile = request.user.profile
+        profile.profile_picture = request.FILES.get('profile_picture')
+        profile.save()
+        return Response({'profile_picture': profile.profile_picture.url})

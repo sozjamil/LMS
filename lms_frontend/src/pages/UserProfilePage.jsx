@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
+import ProfilePictureUpload from './ProfilePictureUpload';
 
 const UserProfilePage = () => {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState("student");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
@@ -13,7 +13,6 @@ const UserProfilePage = () => {
       try {
         const response = await api.get("/api/profile/");
         setUser(response.data);
-        setRole(response.data.role);
       } catch (error) {
         setError("Failed to fetch profile. Please try again later.");
         console.error("Failed to fetch profile:", error);
@@ -22,19 +21,6 @@ const UserProfilePage = () => {
 
     fetchProfile();
   }, []);
-
-  // Update user role
-  const handleRoleChange = async (newRole) => {
-    try {
-      const response = await api.patch("/api/profile/", { role: newRole });
-      setRole(response.data.role);
-      setError(""); // Clear any previous errors
-      alert("Role updated successfully!");
-    } catch (error) {
-      setError("Failed to update role. Please try again.");
-      console.error("Failed to update role:", error);
-    }
-  };
 
   // Update password
   const handlePasswordChange = async () => {
@@ -54,18 +40,10 @@ const UserProfilePage = () => {
       <h1>User Profile</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
       {user ? (
-        <div>
+        <div> 
+          <ProfilePictureUpload />
           <p>Username: {user.username}</p>
           <p>Email: {user.email}</p>
-          <p>Role: {role}</p>
-
-          {/* Role Update Buttons */}
-          <button onClick={() => handleRoleChange("instructor")}>
-            Become Instructor
-          </button>
-          <button onClick={() => handleRoleChange("student")}>
-            Become Student
-          </button>
 
           {/* Password Update Form */}
           <div>

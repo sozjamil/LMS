@@ -4,7 +4,8 @@ import { Link } from 'react-router-dom';
 
 const Navbar = () => {
 
-  const { isAuthenticated, logout } = useAuth(); // Uses context
+  const { isAuthenticated, logout, user } = useAuth(); // Uses context
+  const isInstructor = user?.role === 'instructor';
   
   return (
     <nav >
@@ -15,8 +16,15 @@ const Navbar = () => {
         <li><Link to="/" >Home</Link></li>
         {isAuthenticated && (
           <>
-            <li><Link to="/profile">Profile</Link>
-            </li>
+            <li><Link to="/profile">Profile</Link></li>
+              {/*  for students */}
+
+            {isInstructor ? (
+              <li><Link to="/manage-courses">My Courses</Link></li> // for instructors
+            ) : (
+             <li><Link to="/my-courses">My Courses</Link></li>  
+            )}
+
             <li><button onClick={logout}>Logout</button></li>
           </>
         )}

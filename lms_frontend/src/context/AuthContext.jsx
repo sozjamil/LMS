@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,10 +17,23 @@ export const AuthProvider = ({ children }) => {
     }
   }, [accessToken]);
 
-  const login = (token) => {
-    localStorage.setItem('accessToken', token);
+  // const login = (token) => {
+  //   localStorage.setItem('accessToken', token);
     
+  //   setAccessToken(token);
+  // };
+  const login = async (token) => {
+    localStorage.setItem('accessToken', token);
     setAccessToken(token);
+  
+    // Fetch user profile after login
+    const response = await fetch('http://localhost:8000/api/profile/', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const userData = await response.json();
+    setUser(userData); // userData contains `role`, `username`, etc.
   };
 
   const logout = () => {

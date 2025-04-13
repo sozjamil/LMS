@@ -23,10 +23,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source='profile.role', read_only=True)
+    profile_picture = serializers.ImageField(source='profile.profile_picture', read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'role']
+        fields = ['id', 'username', 'email', 'password', 'role', 'profile_picture']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data): 

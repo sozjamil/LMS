@@ -58,6 +58,9 @@ INSTALLED_APPS = [
 
     # Custom apps
     'courses',
+    
+    #AWS S3 details.
+    'storages',
 ]
 
 MIDDLEWARE = [

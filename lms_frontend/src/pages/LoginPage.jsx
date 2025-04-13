@@ -1,17 +1,19 @@
-// src/pages/LoginPage.js
-
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../utils/api'; // Import the api instance
 import useAuth from '../hooks/useAuth';
 
 const LoginPage = () => {
   const { login } = useAuth(); // from context
   const navigate = useNavigate();
+
   const [username, setUsername] = useState('');  // Changed from email to username
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  const location = useLocation();
+  const from = location.state?.from || '/'; // default to home if none
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,14 +29,9 @@ const LoginPage = () => {
       localStorage.setItem('accessToken', response.data.access);
       localStorage.setItem('refreshToken', response.data.refresh);
 
-      // Simulate login API call
-      const Token = 'accessToken'; // Replace this with real API response
-
-      // Save to context (this will trigger Navbar update!)
-      login(Token);
-
-      // Redirect to the homepage or course management page after successful login
-      navigate('/');
+      login(response.data.access);
+      // Redirect to page before login either the homepage    
+      navigate(from); 
     } catch (error) {
       // Detailed error logging
       console.error('Error logging in:', error.response?.data || error.message);
