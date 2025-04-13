@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import CourseDetailView, CourseList, CourseReviewListCreateView, EnrollInCourseView, InstructorCoursesView, LessonList, CreateCourseView, LessonCreateView, LessonUpdateView, UserProfileView
+from .views import CourseDetailView, CourseList, CourseReviewListCreateView, EnrollInCourseView, EnrolledCoursesView, InstructorCoursesView, LessonList, CreateCourseView, LessonCreateView, LessonUpdateView, UserProfileView
 from .views import RegisterUserView
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import  TokenRefreshView #, TokenObtainPairView
+from .views import CustomTokenObtainPairView 
 
 urlpatterns = [
     path('courses/', CourseList.as_view(), name='course-list'),
@@ -17,11 +18,17 @@ urlpatterns = [
     path('lessons/<int:lesson_id>/', LessonUpdateView.as_view(), name='lesson-update'),
 
     path('register/', RegisterUserView.as_view(), name='register'),
-    path('token/', TokenObtainPairView.as_view(), name='token-obtain'),
+    # path('token/', TokenObtainPairView.as_view(), name='token-obtain'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     # enrollment path
     path('courses/<int:course_id>/enroll/', EnrollInCourseView.as_view(), name='enroll-course'),
     # review path 
     path('courses/<int:course_id>/reviews/', CourseReviewListCreateView.as_view(), name='course-reviews'),
+    # Adding “My Courses” path
+    path('student/courses/', EnrolledCoursesView.as_view(), name='enrolled-courses'),
+    
+    path('token/', CustomTokenObtainPairView.as_view(), name='token-obtain'),
+
+
    
 ]

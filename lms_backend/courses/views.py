@@ -7,7 +7,7 @@ from rest_framework import generics, permissions
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 import urllib
 from .models import Course, Lesson, Profile, Enrollment, Review
-from .serializers import CourseSerializer, LessonSerializer, EnrollmentSerializer, ReviewSerializer
+from .serializers import CourseSerializer, CustomTokenObtainPairSerializer, LessonSerializer, EnrollmentSerializer, ReviewSerializer
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -26,6 +26,7 @@ from .aws_s3 import upload_to_s3
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from rest_framework import serializers
 
@@ -33,7 +34,9 @@ class IsInstructor(BasePermission):
     def has_permission(self, request, view):
         return hasattr(request.user, 'profile') and request.user.profile.role == 'instructor'
     
-
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+    
 # class TokenObtainPairView(APIView):
 #     def post(self, request):
 #         serializer = TokenSerializer(data=request.data)
@@ -293,3 +296,15 @@ class CourseReviewListCreateView(generics.ListCreateAPIView):
         if not Enrollment.objects.filter(course_id=course_id, student=user).exists():
             raise serializers.ValidationError("You must be enrolled to leave a review.")
         serializer.save(course_id=course_id, student=user)
+        
+class EnrolledCoursesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        enrolled_courses = Course.objects.filter(students=user)
+        course_data = [
+            {'id': course.id, 'title': course.title, 'description': course.description}
+            for course in enrolled_courses
+        ]
+        return Response(course_data)

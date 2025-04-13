@@ -36,6 +36,7 @@ class Course(models.Model):
     instructor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='courses')
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    students = models.ManyToManyField(User, through='Enrollment', related_name='enrolled_courses')
 
     def __str__(self):
         return self.title

@@ -1,9 +1,30 @@
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from rest_framework import serializers
 from .models import Course, Lesson, Profile, Enrollment, Review
 
+# TokenObtainPairSerializer is the default serializer used by Django REST to handle login 
+# and return: access token, refresh token
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+
+        # Add custom fields
+        data['username'] = self.user.username
+        data['id'] = self.user.id
+
+        # Add role if profile exists
+        if hasattr(self.user, 'profile'):
+            data['role'] = self.user.profile.role
+            data['isInstructor'] = self.user.profile.role == 'instructor'
+        else:
+            data['role'] = None
+            data['isInstructor'] = False
+
+        return data
+    
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source='profile.role', read_only=True)
