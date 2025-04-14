@@ -20,6 +20,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             data['role'] = self.user.profile.role
         return data
     
+# Token serializer
+class TokenSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
+    
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source='profile.role', read_only=True)
@@ -41,11 +46,13 @@ class UserSerializer(serializers.ModelSerializer):
 
         return user
 
+class PublicUserSerializer(serializers.ModelSerializer):
+    profile_picture = serializers.ImageField(source='profile.profile_picture', read_only=True)
+    role = serializers.CharField(source='profile.role', read_only=True)
 
-# Token serializer
-class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'profile_picture', 'role']
 
     
 class LessonSerializer(serializers.ModelSerializer): 
@@ -69,10 +76,11 @@ class LessonSerializer(serializers.ModelSerializer):
     
 class CourseSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)  # Problem solve add `read_only=True`
+    instructor = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'price', 'published', 'lessons']
+        fields = ['id', 'title', 'description', 'price', 'published', 'lessons', 'instructor']
         read_only_fields = ['instructor']  # Instructor should not be editable.
 
     def update(self, instance, validated_data):
@@ -115,8 +123,9 @@ class EnrollmentSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='student.username', read_only=True)
+    student = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = Review
-        fields = ['id','username', 'rating', 'comment', 'created_at']
+        fields = ['id','username', 'rating', 'comment', 'created_at', 'student']
         read_only_fields = ['student','username','course', 'created_at']
