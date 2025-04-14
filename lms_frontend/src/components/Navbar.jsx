@@ -14,8 +14,26 @@ const Navbar = () => {
       </div>
       <ul >
         <li><Link to="/" >Home</Link></li>
-        {isAuthenticated && (
-          <>
+        {isAuthenticated && user && (
+          <>{/* Profile Picture */}
+            {user?.profile_picture ? (
+              <img
+                src={user.profile_picture}
+                alt="Avatar"
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '1px solid #ccc'
+                }}
+              />
+            ) : (
+              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center text-sm text-white">
+                {user.username?.[0]?.toUpperCase() || 'U'}
+              </div>
+            )}
+            <span className="text-sm">{user.username}</span>
             <li><Link to="/profile">Profile</Link></li>
               {/*  for students */}
 

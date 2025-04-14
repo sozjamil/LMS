@@ -5,41 +5,52 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
+  //Initialize the state with access token from localStorage
   const [accessToken, setAccessToken] = useState(localStorage.getItem('accessToken'));
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+      // Try to get user info from localStorage (if available)
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    });
 
   useEffect(() => {
-    if (accessToken) {
+    //If there's a valid access token, we can fetch the user profile
+    if (accessToken && !user) {
       // Optionally fetch user profile here using the token
-      setUser({ name: 'User' }); // Placeholder user
-    } else {
-      setUser(null);
+      fetchUserProfile(accessToken);
     }
-  }, [accessToken]);
+  }, [accessToken]); 
+  
+  const fetchUserProfile = async (token) => {
+      try {
+        const response = await fetch('http://localhost:8000/api/profile/', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const userData = await response.json();
+        setUser(userData);
+        localStorage.setItem('user', JSON.stringify(userData)); // Save user data in localStorage
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+        setUser(null);
+      }
+    };
 
-  // const login = (token) => {
-  //   localStorage.setItem('accessToken', token);
-    
-  //   setAccessToken(token);
-  // };
+  
   const login = async (token) => {
     localStorage.setItem('accessToken', token);
     setAccessToken(token);
   
     // Fetch user profile after login
-    const response = await fetch('http://localhost:8000/api/profile/', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const userData = await response.json();
-    setUser(userData); // userData contains `role`, `username`, etc.
+    await fetchUserProfile(token);
   };
 
   const logout = () => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken'); 
-    setAccessToken(null);
+    setAccessToken(null);    
+    setUser(null);
     navigate('/login'); // optional redirect
   };
 

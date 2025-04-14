@@ -6,19 +6,19 @@ const UserProfilePage = () => {
   const [user, setUser] = useState(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
-  // Fetch user profile data
+  
+  // fetch user profile data from the API
+  const fetchProfile = async () => {
+    try {
+      const response = await api.get("/api/profile/");
+      setUser(response.data);
+    } catch (error) {
+      setError("Failed to fetch profile. Please try again later.");
+      console.error("Failed to fetch profile:", error);
+    }
+  };
+  //Fetch when component loads
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await api.get("/api/profile/");
-        setUser(response.data);
-      } catch (error) {
-        setError("Failed to fetch profile. Please try again later.");
-        console.error("Failed to fetch profile:", error);
-      }
-    };
-
     fetchProfile();
   }, []);
 
@@ -41,7 +41,17 @@ const UserProfilePage = () => {
       {error && <p style={{ color: "red" }}>{error}</p>}
       {user ? (
         <div> 
-          <ProfilePictureUpload />
+          <ProfilePictureUpload onUploadSuccess={fetchProfile}/>
+          {user.profile_picture ? (
+            <img
+              src={user.profile_picture}
+              alt="Profile"
+              style={{ width: "100px", height: "100px", borderRadius: "50%", objectFit: "cover" }}
+            />
+          ) : (
+            <p>No profile picture uploaded.</p>
+          )}
+          
           <p>Username: {user.username}</p>
           <p>Email: {user.email}</p>
 

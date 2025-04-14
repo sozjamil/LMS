@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import useAuth from '../context/AuthContext';
 
-export default function ProfilePictureUpload() {
+export default function ProfilePictureUpload({ onUploadSuccess }) {
   const { accessToken } = useAuth();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState('');
 
   const handleFileChange = (e) => {
     const selected = e.target.files[0];
@@ -15,6 +16,7 @@ export default function ProfilePictureUpload() {
 
   const handleUpload = async () => {
     if (!file) return;
+    setUploadMessage('');
 
     const formData = new FormData();
     formData.append('profile_picture', file);
@@ -28,15 +30,24 @@ export default function ProfilePictureUpload() {
         },
         body: formData,
       });
-
+      
       const data = await res.json();
       console.log('Uploaded profile picture:', data.profile_picture);
       alert('Profile picture uploaded successfully!');
+      setUploadMessage('Image uploaded successfully!');
+            
+      // Call parent to refresh profile data
+      if (response.status === 200 && onUploadSuccess) {
+        onUploadSuccess();
+     }
     } catch (error) {
       console.error('Upload failed:', error);
     } finally {
       setUploading(false);
-    }
+    } 
+
+    
+      
   };
 
   return (
@@ -51,6 +62,9 @@ export default function ProfilePictureUpload() {
       >
         {uploading ? 'Uploading...' : 'Upload'}
       </button>
+      {uploadMessage && (
+        <p className="text-green-600 mt-2 font-semibold">{uploadMessage}</p>
+      )}
     </div>
   );
 }
