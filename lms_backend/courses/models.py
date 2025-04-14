@@ -38,7 +38,8 @@ class Course(models.Model):
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     students = models.ManyToManyField(User, through='Enrollment', related_name='enrolled_courses')
-
+    #Add image field
+    thumbnail = models.ImageField(upload_to='course_thumbnails/', blank=True, null=True)
     def __str__(self):
         return self.title
 

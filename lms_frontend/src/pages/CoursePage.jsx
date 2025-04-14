@@ -97,10 +97,25 @@ const CoursePage = () => {
       <h1>{course.title}</h1>
       <p>{course.description}</p>
       <h2>Lessons</h2>
+
+      {/* show instructors username and profile picture */}
+      {course.instructor && (
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: '1rem' }}>
+          <img
+            src={course.instructor.profile_picture}
+            alt="Instructor"
+            style={{ width: '60px', height: '60px', borderRadius: '50%', marginRight: '10px' }}
+          />
+          <div>
+            <p><strong>Instructor:</strong> {course.instructor.username}</p>
+          </div>
+        </div>
+      )}
+
       <p>{course.lessons.length} lessons available</p>
-      {/* <p>Instructor: {course.instructor.username}</p>    */}
       <p>Price: {course.price} USD</p>
-      
+
+       {/* enrollment button */}
       {isVisitor && (<button onClick={handleEnroll}>Enroll to Unlock Full Content</button>)}
 
       {isInstructor && (<button disabled>You can't enroll</button>)}
@@ -110,18 +125,29 @@ const CoursePage = () => {
       {(isStudent && !isEnrolled) &&(
         <button onClick={handleEnroll}>Enroll to Unlock Full Content</button>
       )}
+
+      {/* Reviews Section */}
       <ul>
         {reviews.length === 0 ? (
           <p>No reviews yet.</p>
         ) : (
           reviews.map((review) => (
-            <li key={review.id}>
-               <strong>{review.username}</strong> : {review.rating} ⭐
-              <p>{review.comment}</p>
-            </li>
+            <div key={review.id} style={{ display: 'flex', alignItems: 'center', marginTop: '1rem' }}>
+              <img
+                src={review.student.profile_picture}
+                alt="student"
+                style={{ width: '60px', height: '60px', borderRadius: '50%', marginRight: '10px' }}
+              />
+              <div>
+                <p><strong>{review.username}</strong> : {review.rating} ⭐</p>
+                <p>{review.comment}</p>
+              </div>
+            </div>
           ))
         )}
       </ul>
+
+      {/* Review Form */}
       {isEnrolled && (
         <form onSubmit={handleReviewSubmit}>
           <h3>Leave a Review</h3>
@@ -146,8 +172,10 @@ const CoursePage = () => {
           <button type="submit" disabled={hasReviewed}>Submit Review</button>
         </form>
       )}
-      <ul>
 
+      {/* Lessons List */}
+      <h2>Lessons</h2>
+      <ul>
         {course.lessons.map((lesson) => (
           <li key={lesson.id} >
             <h3>{lesson.title}</h3>

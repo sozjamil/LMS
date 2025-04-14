@@ -138,6 +138,7 @@ class RegisterUserView(APIView):
         print("Serializer Errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# view for showing course details and allowing instructors to update their courses
 class CourseDetailView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     parser_classes = [MultiPartParser, FormParser]  # To handle file uploads
@@ -179,7 +180,7 @@ class CourseDetailView(APIView):
         
         except Course.DoesNotExist:
             return Response({'error': 'Course not found'}, status=404)
-
+    # managing courses update for instructors
     def put(self, request, course_id):
         try:
             course = Course.objects.get(id=course_id)
@@ -239,7 +240,8 @@ class LessonUpdateView(APIView):
         except Exception as e:
             print(f"Error updating lesson: {str(e)}")
             return Response({'error': 'An error occurred while updating the lesson.'}, status=500)
-    
+
+# view for instructors to see their courses "My courses"   
 class InstructorCoursesView(APIView):
     permission_classes = [IsAuthenticated, IsInstructor]
 
@@ -247,7 +249,7 @@ class InstructorCoursesView(APIView):
         # Get all courses where the instructor is the current user
         courses = Course.objects.filter(instructor=request.user)
         course_data = [
-            {'id': course.id, 'title': course.title, 'description': course.description}
+            {'id': course.id, 'title': course.title, 'description': course.description, 'thumbnail': course.thumbnail.url if course.thumbnail else None}
             for course in courses
         ]
         return Response(course_data)
@@ -277,9 +279,7 @@ class EnrollInCourseView(APIView):
         else:
             return Response({'message': 'Already enrolled'})
         
-        
-    
-    
+# view for showing reviews for a course and allowing students to leave reviews
 class CourseReviewListCreateView(generics.ListCreateAPIView):
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -295,7 +295,8 @@ class CourseReviewListCreateView(generics.ListCreateAPIView):
         if not Enrollment.objects.filter(course_id=course_id, student=user).exists():
             raise serializers.ValidationError("You must be enrolled to leave a review.")
         serializer.save(course_id=course_id, student=user)
-        
+
+# view for students to see their enrolled courses "My courses"
 class EnrolledCoursesView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -303,12 +304,13 @@ class EnrolledCoursesView(APIView):
         user = request.user
         enrolled_courses = Course.objects.filter(students=user)
         course_data = [
-            {'id': course.id, 'title': course.title, 'description': course.description}
+            {'id': course.id, 'title': course.title, 'description': course.description, 'thumbnail': course.thumbnail.url if course.thumbnail else None}
             for course in enrolled_courses
         ]
         return Response(course_data)
     
 class ProfilePictureUploadView(APIView):
+
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated]
 
@@ -317,3 +319,4 @@ class ProfilePictureUploadView(APIView):
         profile.profile_picture = request.FILES.get('profile_picture')
         profile.save()
         return Response({'profile_picture': profile.profile_picture.url})
+    

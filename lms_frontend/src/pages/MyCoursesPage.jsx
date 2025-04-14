@@ -34,7 +34,14 @@ const MyCoursesPage = () => {
           {courses.map(course => (
             <li key={course.id}>
               <button onClick={() => navigate(`/courses/${course.id}`)}>
-                {course.title}
+                {course.thumbnail && (
+                  <img
+                    src={course.thumbnail}
+                    alt="Course Cover"
+                    style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', marginBottom: '1rem' }}
+                  />
+                )}
+              {course.title}
               </button>
               <p>{course.description}</p>
             </li>

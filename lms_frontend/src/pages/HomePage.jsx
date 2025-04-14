@@ -38,7 +38,14 @@ const HomePage = () => {
         {courses.map((course) => (
           <li key={course.id}>
             <button onClick={() => handleCourseClick(course.id)}>
-              {course.title}
+              {course.thumbnail && (
+                <img
+                  src={course.thumbnail}
+                  alt="Course Cover"
+                  style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', marginBottom: '1rem' }}
+                />
+              )}
+            {course.title}
             </button>
           </li>
         ))}

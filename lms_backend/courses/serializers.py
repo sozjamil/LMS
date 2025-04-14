@@ -77,10 +77,11 @@ class LessonSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)  # Problem solve add `read_only=True`
     instructor = PublicUserSerializer(read_only=True)
+    thumbnail = serializers.ImageField(required=False) 
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'price', 'published', 'lessons', 'instructor']
+        fields = ['id', 'title', 'description', 'price', 'published', 'lessons', 'instructor', 'thumbnail']
         read_only_fields = ['instructor']  # Instructor should not be editable.
 
     def update(self, instance, validated_data):
