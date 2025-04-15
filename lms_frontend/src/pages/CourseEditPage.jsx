@@ -54,6 +54,11 @@ const CourseEditPage = () => {
         formData.append("video", newLesson.video);
       }
 
+      console.log("FormData before sending:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
       const response = await api.post(`/api/courses/${id}/lessons/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -89,6 +94,7 @@ const CourseEditPage = () => {
         console.log("No video file provided or invalid file type.");
       }
       
+     // Debug Test: Check FormData entries before sending 
       console.log("Editing lesson FormData entries:");
       for (let [key, value] of formData.entries()) {
         console.log(key, value);
@@ -102,13 +108,15 @@ const CourseEditPage = () => {
       });
 
       // Update the course state with the updated lesson
-      setCourse((prevCourse) => ({
-        ...prevCourse,
-        lessons: prevCourse.lessons.map((lesson) =>
-          lesson.id === editingLesson.id ? response.data : lesson
-        ),
-      }));
-  
+      // setCourse((prevCourse) => ({
+      //   ...prevCourse,
+      //   lessons: prevCourse.lessons.map((lesson) =>
+      //     lesson.id === editingLesson.id ? response.data : lesson
+      //   ),
+      // }));
+
+      // update the course state with the updated lesson
+      await fetchCourse();
       alert("Lesson updated successfully!");
       setEditingLesson(null);
       
@@ -171,9 +179,15 @@ const CourseEditPage = () => {
               <div key={lesson.id}>
                 <p>{lesson.title}</p>
                 <p>{lesson.content}</p>
-                {lesson.video_url && <a href={lesson.video_url}>View Video</a>}
-                <button onClick={() => setEditingLesson(lesson)}>Edit</button>
-                <button onClick={() => handleDeleteLesson(lesson.id)}>Delete</button>
+                {lesson.video_url && <a href={lesson.video_url}>{lesson.video_url}</a>}
+                <button onClick={() => 
+                  setEditingLesson({
+                    id: lesson.id,
+                    title: lesson.title,
+                    content: lesson.content,
+                    video: null, })
+                    }>Edit</button>
+                {/* <button onClick={() => handleDeleteLesson(lesson.id)}>Delete</button> */}
               </div>
             ))}
           </div>
@@ -223,6 +237,7 @@ const CourseEditPage = () => {
               />
               <input
                 type="file"
+                accept="video/*"
                 onChange={(e) =>
                   setNewLesson({ ...newLesson, video: e.target.files[0] })
                 }

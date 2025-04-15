@@ -1,5 +1,7 @@
+// creating a new course page
 import React, { useState } from 'react';
 import api from '../utils/api'; // Import the api instance
+import { useNavigate } from 'react-router-dom';
 
 const CreateCoursePage = () => {
   const [title, setTitle] = useState('');
@@ -7,6 +9,7 @@ const CreateCoursePage = () => {
   const [price, setPrice] = useState(''); // Add state for price
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,6 +42,10 @@ const CreateCoursePage = () => {
           },
         }
       );
+      
+      const courseId = response.data.id; // assuming the backend returns the course ID
+      navigate(`/manage/course/${courseId}`);
+
       // Handle successful course creation
       console.log('Course created:', response.data);
     } catch (error) {

@@ -36,27 +36,14 @@ class IsInstructor(BasePermission):
     
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-    
-# class TokenObtainPairView(APIView):
-#     def post(self, request):
-#         serializer = TokenSerializer(data=request.data)
-#         if serializer.is_valid():
-#             username = serializer.validated_data['username']
-#             password = serializer.validated_data['password']
-#             user = User.objects.filter(username=username).first()
-#             if user and user.check_password(password):
-#                 refresh = RefreshToken.for_user(user)
-#                 return Response({
-#                     'access': str(refresh.access_token),
-#                     'refresh': str(refresh)
-#                 })
-#             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CourseList(generics.ListCreateAPIView):
-    queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny] 
+    
+    def get_queryset(self):
+            user = self.request.user
+            return Course.objects.filter(published=True)  # Everyone else sees only published
 
 class LessonList(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
@@ -78,31 +65,7 @@ class CreateCourseView(generics.CreateAPIView):
 #     serializer_class = LessonSerializer
 #     permission_classes = [IsAuthenticated, IsInstructor] 
 
-class LessonCreateView(APIView):
-    def post(self, request, course_id):
-        title = request.data.get('title')
-        content = request.data.get('content')
-        video = request.FILES.get('video')
 
-        if not video:
-            return Response({"error": "Video file is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Upload video to S3
-        file_name = f'{course_id}/{video.name}'
-        video_url = upload_to_s3(video, settings.AWS_STORAGE_BUCKET_NAME, file_name)
-
-        if not video_url:
-            return Response({"error": "Failed to upload video."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        lesson = Lesson.objects.create(
-            title=title,
-            content=content,
-            course_id=course_id,
-            video_url=video_url,
-        )
-
-        serializer = LessonSerializer(lesson)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
@@ -146,6 +109,10 @@ class CourseDetailView(APIView):
     def get(self, request, course_id):
         try:
             course = Course.objects.get(id=course_id)
+            
+            # Hide unpublished courses from everyone except the instructor
+            if not course.published and course.instructor != request.user:
+                return Response({'error': 'Course not found'}, status=404)
            
             # Only check enrollment if user is authenticated
             enrolled = False
@@ -168,7 +135,7 @@ class CourseDetailView(APIView):
             course_data = serializer.data
 
             # If not enrolled, hide content and videos
-            if not enrolled:
+            if not enrolled and course.instructor != request.user:
                 for lesson in course_data.get('lessons', []):
                     lesson['content'] = 'Enroll to see the content'
                     lesson['video_url'] = None
@@ -180,6 +147,7 @@ class CourseDetailView(APIView):
         
         except Course.DoesNotExist:
             return Response({'error': 'Course not found'}, status=404)
+   
     # managing courses update for instructors
     def put(self, request, course_id):
         try:
@@ -201,6 +169,39 @@ class CourseDetailView(APIView):
             print("Error updating course:", str(e))
             return Response({'error': 'An error occurred while updating the course.'}, status=500)
 
+# view for instructors to create lessons for their courses
+class LessonCreateView(APIView):
+    def post(self, request, course_id):
+        title = request.data.get('title')
+        content = request.data.get('content')
+        video = request.FILES.get('video')
+        is_enrolled = Course.students.filter(id=request.user.id).exists()
+
+        # if not video:
+        #     return Response({"error": "Video file is required."}, status=status.HTTP_400_BAD_REQUEST)
+        video_url = None
+
+        # Upload video to S3
+        if video:
+            file_name = f'{course_id}/{video.name}'
+            video_url = upload_to_s3(video, settings.AWS_STORAGE_BUCKET_NAME, file_name)
+            if not video_url:
+                return Response({"error": "Failed to upload video."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        lesson = Lesson.objects.create(
+            title=title,
+            content=content,
+            course_id=course_id,
+            video_url=video_url,# this will be None if no video
+        )
+
+        serializer = LessonSerializer(lesson, many=True, context={
+            'request': request,
+            'enrolled': is_enrolled,
+        })
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+# view for instructors to update their lessons
 class LessonUpdateView(APIView): 
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
@@ -208,6 +209,8 @@ class LessonUpdateView(APIView):
     def put(self, request, lesson_id):
         try:
             lesson = Lesson.objects.get(id=lesson_id)
+            is_enrolled = Enrollment.objects.filter(student=request.user, course=lesson.course).exists()
+            
 
             if lesson.course.instructor != request.user:
                 return Response({'error': 'Unauthorized'}, status=403)
@@ -232,7 +235,10 @@ class LessonUpdateView(APIView):
             # Save the updated lesson
             lesson.save()
             
-            serializer = LessonSerializer(lesson)
+            serializer = LessonSerializer(lesson, context={
+                'request': request,
+                'enrolled': is_enrolled,  # your logic
+            })
             return Response(serializer.data)
 
         except Lesson.DoesNotExist:
@@ -249,7 +255,9 @@ class InstructorCoursesView(APIView):
         # Get all courses where the instructor is the current user
         courses = Course.objects.filter(instructor=request.user)
         course_data = [
-            {'id': course.id, 'title': course.title, 'description': course.description, 'thumbnail': course.thumbnail.url if course.thumbnail else None}
+            {'id': course.id, 'title': course.title, 'description': course.description,
+              'thumbnail': course.thumbnail.url if course.thumbnail else None,'published': course.published,
+            }
             for course in courses
         ]
         return Response(course_data)
@@ -262,6 +270,7 @@ class UserProfileView(RetrieveUpdateAPIView):
         # Return the authenticated user
         return self.request.user
 
+# view for students to enroll in courses
 class EnrollInCourseView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -302,7 +311,7 @@ class EnrolledCoursesView(APIView):
 
     def get(self, request):
         user = request.user
-        enrolled_courses = Course.objects.filter(students=user)
+        enrolled_courses = Course.objects.filter(students=user, published=True)
         course_data = [
             {'id': course.id, 'title': course.title, 'description': course.description, 'thumbnail': course.thumbnail.url if course.thumbnail else None}
             for course in enrolled_courses
@@ -319,4 +328,28 @@ class ProfilePictureUploadView(APIView):
         profile.profile_picture = request.FILES.get('profile_picture')
         profile.save()
         return Response({'profile_picture': profile.profile_picture.url})
-    
+
+# view for instructors to delete their courses   
+class InstructorCourseDeleteView(APIView):
+    permission_classes = [IsAuthenticated, IsInstructor]
+
+    def delete(self, request, course_id):
+        try:
+            course = Course.objects.get(id=course_id, instructor=request.user)
+            course.delete()
+            return Response({'message': 'Course deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+        except Course.DoesNotExist:
+            return Response({'error': 'Course not found or unauthorized.'}, status=status.HTTP_404_NOT_FOUND)
+        
+# view for instructors to toggle course publish status
+class ToggleCoursePublishView(APIView):
+    permission_classes = [IsAuthenticated, IsInstructor]
+
+    def post(self, request, course_id):
+        try:
+            course = Course.objects.get(id=course_id, instructor=request.user)
+            course.published = not course.published
+            course.save()
+            return Response({'published': course.published}, status=status.HTTP_200_OK)
+        except Course.DoesNotExist:
+            return Response({'error': 'Course not found or unauthorized.'}, status=status.HTTP_404_NOT_FOUND)

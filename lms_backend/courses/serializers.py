@@ -59,18 +59,20 @@ class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = ['id', 'title', 'content', 'video_url']
-        read_only_fields = ['video_url']  # Problem solve Mark video_url as read-only 
+        read_only_fields = ['id']  # Problem solve Mark video_url as read-only 
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
         request = self.context.get('request')
+        user = request.user if request else None
         enrolled = self.context.get('enrolled', False)  #Pass this from the view
 
 
          # Only show content if enrolled
-        if not enrolled:
+        if not enrolled and user != instance.course.instructor:
             data['content'] = None
             data['video_url'] = None
+            print("Lesson hidden for user:", user) #test
 
         return data
     

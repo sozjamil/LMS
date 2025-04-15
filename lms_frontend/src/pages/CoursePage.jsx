@@ -1,3 +1,4 @@
+// Couraw detail page 
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import api from '../utils/api';
@@ -14,7 +15,7 @@ const CoursePage = () => {
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const { user, isAuthenticated } = useAuth();  // Access user from context
-  const hasReviewed = reviews.some(review => review.user === user?.id); // User can only make one comment
+  const hasReviewed = reviews.some(review => review.student?.id === user?.id); // User can only make one comment
   
   const location = useLocation();// to take user to the same place before login
   
@@ -115,15 +116,21 @@ const CoursePage = () => {
       <p>{course.lessons.length} lessons available</p>
       <p>Price: {course.price} USD</p>
 
-       {/* enrollment button */}
-      {isVisitor && (<button onClick={handleEnroll}>Enroll to Unlock Full Content</button>)}
+      {course.instructor.id === user.id ? (
+          <p></p>
+      ) : ( 
+        <>
+          {/* enrollment button */}
+          {isVisitor && (<button onClick={handleEnroll}>Enroll to Unlock Full Content</button>)}
 
-      {isInstructor && (<button disabled>You can't enroll</button>)}
-      
-      {isEnrolled && (<p>You are enrolled in this course.</p> )}
-      
-      {(isStudent && !isEnrolled) &&(
-        <button onClick={handleEnroll}>Enroll to Unlock Full Content</button>
+          {isInstructor && (<button disabled>You can't enroll</button>)}
+          
+          {isEnrolled && (<p>You are enrolled in this course.</p> )}
+          
+          {(isStudent && !isEnrolled) &&(
+            <button onClick={handleEnroll}>Enroll to Unlock Full Content</button>
+          )}
+        </>
       )}
 
       {/* Reviews Section */}
@@ -139,7 +146,7 @@ const CoursePage = () => {
                 style={{ width: '60px', height: '60px', borderRadius: '50%', marginRight: '10px' }}
               />
               <div>
-                <p><strong>{review.username}</strong> : {review.rating} ⭐</p>
+                <p><strong>{review.student.username}</strong> : {review.rating} ⭐</p>
                 <p>{review.comment}</p>
               </div>
             </div>

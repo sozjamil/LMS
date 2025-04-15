@@ -1,3 +1,4 @@
+// Home page displaying all courses
 import React, { useEffect, useState } from 'react';
 import api from '../utils/api'; // Import the API instance
 import { useNavigate } from 'react-router-dom';

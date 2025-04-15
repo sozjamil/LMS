@@ -1,11 +1,14 @@
+// User profile page for instructor/student to view and update their profile information
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
 import ProfilePictureUpload from './ProfilePictureUpload';
+import { useNavigate } from "react-router-dom";
 
 const UserProfilePage = () => {
   const [user, setUser] = useState(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate(); // Get the navigate function
   
   // fetch user profile data from the API
   const fetchProfile = async () => {
@@ -35,6 +38,12 @@ const UserProfilePage = () => {
     }
   };
 
+  // route to course creation page
+  const handleCreateCourse = () => {
+    navigate("/create-course"); // route to your course creation page
+  };    
+  
+
   return (
     <div>
       <h1>User Profile</h1>
@@ -54,6 +63,16 @@ const UserProfilePage = () => {
           
           <p>Username: {user.username}</p>
           <p>Email: {user.email}</p>
+
+          {/* Instructor-only button */}
+          { user?.role === 'instructor' && (
+            <button
+              onClick={handleCreateCourse}
+              style={{ backgroundColor: "#007bff", color: "white", marginTop: "1rem" }}
+            >
+              Create New Course
+            </button>
+          )}
 
           {/* Password Update Form */}
           <div>
