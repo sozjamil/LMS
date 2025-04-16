@@ -25,7 +25,7 @@ from django.http import JsonResponse
 from .aws_s3 import upload_to_s3
 from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
 from django.core.files.uploadedfile import TemporaryUploadedFile
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from rest_framework import serializers
@@ -37,6 +37,7 @@ class IsInstructor(BasePermission):
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
+# view for listing courses
 class CourseList(generics.ListCreateAPIView):
     serializer_class = CourseSerializer
     permission_classes = [AllowAny] 
@@ -45,11 +46,13 @@ class CourseList(generics.ListCreateAPIView):
             user = self.request.user
             return Course.objects.filter(published=True)  # Everyone else sees only published
 
+# view for showing lessons in a course
 class LessonList(generics.ListCreateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [AllowAny]
 
+# view for creating a course only for instructors
 class CreateCourseView(generics.CreateAPIView):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
@@ -60,13 +63,7 @@ class CreateCourseView(generics.CreateAPIView):
         # Automatically set the instructor to the authenticated user
         serializer.save(instructor=self.request.user)
 
-# class LessonCreateView(generics.CreateAPIView):
-#     queryset = Lesson.objects.all()
-#     serializer_class = LessonSerializer
-#     permission_classes = [IsAuthenticated, IsInstructor] 
-
-
-
+# view for registering users
 class RegisterUserView(APIView):
     permission_classes = [AllowAny]
 
@@ -118,14 +115,7 @@ class CourseDetailView(APIView):
             enrolled = False
             
             if request.user.is_authenticated:
-            #    print("User:", request.user) #test
-            #    print("Is authenticated:", request.user.is_authenticated)
-            #    print("All enrollments:", Enrollment.objects.all())
                enrolled = Enrollment.objects.filter(course=course, student=request.user).exists()
-            #    print("Enrolled:", enrolled) #test
-
-            # if course.instructor != request.user:
-            #     return Response({'error': 'Unauthorized'}, status=403)
 
             serializer = CourseSerializer(
                 course,
@@ -141,9 +131,6 @@ class CourseDetailView(APIView):
                     lesson['video_url'] = None
 
             return Response(course_data)
-            # import json #test
-            # print("Final course data:", json.dumps(course_data, indent=2))
-            # return Response(course_data)
         
         except Course.DoesNotExist:
             return Response({'error': 'Course not found'}, status=404)
@@ -176,11 +163,8 @@ class LessonCreateView(APIView):
         content = request.data.get('content')
         video = request.FILES.get('video')
         is_enrolled = Course.students.filter(id=request.user.id).exists()
-
-        # if not video:
-        #     return Response({"error": "Video file is required."}, status=status.HTTP_400_BAD_REQUEST)
+       
         video_url = None
-
         # Upload video to S3
         if video:
             file_name = f'{course_id}/{video.name}'
@@ -202,10 +186,12 @@ class LessonCreateView(APIView):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 # view for instructors to update their lessons
-class LessonUpdateView(APIView): 
+class LessonUpdateView(RetrieveUpdateDestroyAPIView): 
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
-
+    queryset = Lesson.objects.all()  
+    serializer_class = LessonSerializer  
+    
     def put(self, request, lesson_id):
         try:
             lesson = Lesson.objects.get(id=lesson_id)
@@ -262,6 +248,7 @@ class InstructorCoursesView(APIView):
         ]
         return Response(course_data)
 
+# view for showing user profile and allowing users to update their profile
 class UserProfileView(RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]

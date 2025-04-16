@@ -126,21 +126,29 @@ const CourseEditPage = () => {
       
     }
   };
-  
 
-  // // Delete a lesson
-  // const handleDeleteLesson = async (lessonId) => {
-  //   try {
-  //     await api.delete(`/api/lessons/${lessonId}/`);
-  //     setCourse((prevCourse) => ({
-  //       ...prevCourse,
-  //       lessons: prevCourse.lessons.filter((lesson) => lesson.id !== lessonId),
-  //     }));
-  //     alert("Lesson deleted successfully!");
-  //   } catch (error) {
-  //     console.error("Error deleting lesson:", error);
-  //   }
-  // };
+  // Delete a lesson
+  const handleDeleteLesson = async (lessonId) => {
+    const accessToken = localStorage.getItem('accessToken');
+  
+    if (!window.confirm("Are you sure you want to delete this lesson?")) return;
+  
+    try {
+      await api.delete(`/api/lessons/${lessonId}/`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+  
+      // Re-fetch course to reflect the updated lesson list
+      await fetchCourse();
+      alert("Lesson deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting lesson:", error.response?.data || error.message);
+      alert("Failed to delete lesson. Check console for details.");
+    }
+  };
+
 
   useEffect(() => {
     fetchCourse();
@@ -186,8 +194,11 @@ const CourseEditPage = () => {
                     title: lesson.title,
                     content: lesson.content,
                     video: null, })
-                    }>Edit</button>
-                {/* <button onClick={() => handleDeleteLesson(lesson.id)}>Delete</button> */}
+                    }>Edit
+                </button>
+                <button onClick={() => handleDeleteLesson(lesson.id)} style={{ color: "red" }}>
+                  Delete
+                </button>
               </div>
             ))}
           </div>

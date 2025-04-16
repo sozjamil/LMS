@@ -27,7 +27,7 @@ urlpatterns = [
 
 
     path('lessons/', LessonList.as_view(), name='lesson-list'),
-    path('lessons/<int:lesson_id>/', LessonUpdateView.as_view(), name='lesson-update'),
+    path('lessons/<int:pk>/', LessonUpdateView.as_view(), name='lesson-update'),
 
     path('register/', RegisterUserView.as_view(), name='register'),
     # path('token/', TokenObtainPairView.as_view(), name='token-obtain'),
