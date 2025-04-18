@@ -1,21 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import api from '../utils/api'; // Import the API instance
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Get the navigate function
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await api.get('/api/courses'); // Use the API instance to get courses
+        const response = await api.get('/api/courses');
         setCourses(response.data);
-        setLoading(false);
       } catch (error) {
         console.error('Error fetching courses:', error);
+      } finally {
         setLoading(false);
       }
     };
@@ -23,64 +23,62 @@ const HomePage = () => {
     fetchCourses();
   }, []);
 
-  // filtering courses based on search query
   const filteredCourses = courses.filter(course =>
     course.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
-    return <div className="text-center py-10">Loading...</div>;
-  }
-
   const handleCourseClick = (courseId) => {
-    navigate(`/course/${courseId}`); // Navigate to the course detail page
+    navigate(`/course/${courseId}`);
   };
 
-  return (
-    <div className="container mx-auto px-4">
-      <h1 className="text-3xl font-bold text-center my-8">Welcome to the LMS</h1>
+  if (loading) {
+    return <div className="text-center py-10 text-lg font-semibold">Loading courses...</div>;
+  }
 
-      {/* Search Bar */}
-      <div className="mb-8 flex justify-center">
+  return (
+    <div className="min-h-screen bg-gray-50 px-4 sm:px-8">
+      {/* Hero Section */}
+      <div className="text-center py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg mb-12">
+        <h1 className="text-4xl sm:text-5xl font-bold mb-4">Welcome to Your Learning Hub</h1>
+        <p className="text-lg sm:text-xl">Discover new skills, gain certificates, and level up your career</p>
+      </div>
+
+      {/* Search */}
+      <div className="mb-10 flex justify-center">
         <input
           type="text"
           placeholder="Search courses..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="px-4 py-2 border rounded-md w-full max-w-md"
+          className="w-full max-w-xl px-5 py-3 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
         />
       </div>
 
-      <h2 className="text-2xl font-semibold mb-4">Featured Courses</h2>
-      <div class="bg-blue-500 text-white p-4">
-      Hello, this should be blue with white text!
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+      {/* Featured Courses */}
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">Featured Courses</h2>
+      <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {filteredCourses.length > 0 ? (
           filteredCourses.map((course) => (
             <div
               key={course.id}
-              className="bg-white shadow-lg rounded-lg overflow-hidden hover:scale-105 transform transition-all duration-300"
+              className="bg-white border border-gray-100 shadow-md rounded-xl hover:shadow-xl transition duration-300"
+              onClick={() => handleCourseClick(course.id)}
             >
-              <button
-                onClick={() => handleCourseClick(course.id)}
-                className="w-full"
-              >
-                {course.thumbnail && (
-                  <img
-                    src={course.thumbnail}
-                    alt="Course Cover"
-                    className="w-full h-48 object-cover"
-                  />
-                )}
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold">{course.title}</h3>
-                </div>
-              </button>
+              {course.thumbnail && (
+                <img
+                  src={course.thumbnail}
+                  alt="Course"
+                  className="w-full h-48 object-cover rounded-t-xl"
+                />
+              )}
+              <div className="p-4">
+                <h3 className="text-lg font-semibold text-gray-800">{course.title}</h3>
+                {/* Optionally add price, instructor, or rating here */}
+              </div>
             </div>
           ))
         ) : (
-          <p>No courses found matching your search.</p>
+          <p className="text-gray-500">No courses found matching your search.</p>
         )}
       </div>
     </div>
