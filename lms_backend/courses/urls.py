@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CourseDetailView, CourseList, CourseReviewListCreateView, EnrollInCourseView, EnrolledCoursesView, InstructorCourseDeleteView, InstructorCoursesView, LessonList, CreateCourseView, LessonCreateView, LessonUpdateView, ProfilePictureUploadView, ToggleCoursePublishView, UserProfileView
+from .views import CategoryChoicesView, CourseDetailView, CourseList, CourseReviewListCreateView, EnrollInCourseView, EnrolledCoursesView, InstructorCourseDeleteView, InstructorCoursesView, LessonList, CreateCourseView, LessonCreateView, LessonUpdateView, ProfilePictureUploadView, ToggleCoursePublishView, UserProfileView
 from .views import RegisterUserView
 from rest_framework_simplejwt.views import  TokenRefreshView #, TokenObtainPairView
 from .views import CustomTokenObtainPairView 
@@ -27,12 +27,15 @@ urlpatterns = [
 
 
     path('lessons/', LessonList.as_view(), name='lesson-list'),
-    path('lessons/<int:pk>/', LessonUpdateView.as_view(), name='lesson-update'),
+    path('lessons/<int:lesson_id>/', LessonUpdateView.as_view(), name='lesson-update'),
 
     path('register/', RegisterUserView.as_view(), name='register'),
     # path('token/', TokenObtainPairView.as_view(), name='token-obtain'),
    
     path('token/', CustomTokenObtainPairView.as_view(), name='token-obtain'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # Adding the path for the category choices API
+    path('categories/', CategoryChoicesView.as_view(), name='category-choices'),
+    
    
 ]

@@ -83,7 +83,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'description', 'price', 'published', 'lessons', 'instructor', 'thumbnail']
+        fields = ['id', 'title', 'description', 'price', 'published', 'lessons', 'instructor', 'thumbnail', 'category']
         read_only_fields = ['instructor']  # Instructor should not be editable.
 
     def update(self, instance, validated_data):
@@ -92,6 +92,8 @@ class CourseSerializer(serializers.ModelSerializer):
         instance.description = validated_data.get('description', instance.description)
         instance.price = validated_data.get('price', instance.price)
         instance.published = validated_data.get('published', instance.published)
+        instance.category = validated_data.get('category', instance.category)  # ✅ Add this line
+
         instance.save()
 
         # Update lessons

@@ -31,6 +31,16 @@ def save_profile(sender, instance, **kwargs):
 
 # a model for managing courses   
 class Course(models.Model):
+    CATEGORY_CHOICES = [
+        ('programming', 'Programming'),
+        ('design', 'Design'),
+        ('marketing', 'Marketing'),
+        ('business', 'Business'),
+        ('data', 'Data Science'),
+        ('language', 'Language'),
+        ('personal_dev', 'Personal Development'),
+    ]
+
     title = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -38,8 +48,9 @@ class Course(models.Model):
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     students = models.ManyToManyField(User, through='Enrollment', related_name='enrolled_courses')
-    #Add image field
     thumbnail = models.ImageField(upload_to='course_thumbnails/', blank=True, null=True)
+    category = models.CharField(max_length=100,choices=CATEGORY_CHOICES, default='programming')
+
     def __str__(self):
         return self.title
 

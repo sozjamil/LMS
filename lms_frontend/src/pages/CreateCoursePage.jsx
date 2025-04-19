@@ -1,5 +1,5 @@
 // creating a new course page
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import api from '../utils/api'; // Import the api instance
 import { useNavigate } from 'react-router-dom';
 
@@ -10,6 +10,8 @@ const CreateCoursePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const [category, setCategory] = useState('');
+  const [categoryOptions, setCategoryOptions] = useState([]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +36,8 @@ const CreateCoursePage = () => {
         {
           title,
           description,
-          price, // Send the price field
+          price,
+          category,// Send the price field
         },
         {
           headers: {
@@ -55,6 +58,20 @@ const CreateCoursePage = () => {
 
     setLoading(false);
   };
+
+  // fetch categories from the backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await api.get('/api/categories/');
+        setCategoryOptions(response.data);
+      } catch (err) {
+        console.error('Failed to fetch categories', err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <div>
@@ -86,6 +103,21 @@ const CreateCoursePage = () => {
             onChange={(e) => setPrice(e.target.value)}
             required
           />
+        </div>
+        <div>
+          <label>Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            required
+          >
+            <option value="">-- Select Category --</option>
+            {categoryOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
         <button type="submit" disabled={loading}>
           {loading ? 'Creating...' : 'Create Course'}

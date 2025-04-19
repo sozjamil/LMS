@@ -8,6 +8,9 @@ const CourseEditPage = () => {
   const [loading, setLoading] = useState(true);
   const [editingLesson, setEditingLesson] = useState(null); // Track the lesson being edited
   const [newLesson, setNewLesson] = useState({ title: "", content: "", video: null });
+  const [removeVideoChecked, setRemoveVideoChecked] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [thumbnail, setThumbnail] = useState(null);
 
   // Fetch course data
   const fetchCourse = async () => {
@@ -28,6 +31,11 @@ const CourseEditPage = () => {
       formData.append("title", course.title);
       formData.append("description", course.description);
       formData.append("price", course.price);
+      formData.append("category", course.category);
+      formData.append("category", course.category);
+          if (thumbnail) {
+            formData.append("thumbnail", thumbnail);
+          }
 
       console.log('Access Token:', localStorage.getItem('accessToken'));
       console.log('Refresh Token:', localStorage.getItem('refreshToken'));
@@ -87,8 +95,11 @@ const CourseEditPage = () => {
       const formData = new FormData();
       formData.append("title", editingLesson.title);
       formData.append("content", editingLesson.content);
-  
-      if (editingLesson.video instanceof File) {
+       
+      // remove video checkbox
+      if (removeVideoChecked) {
+        formData.append('remove_video', 'true');
+      } else if (editingLesson.video instanceof File) {
         formData.append("video", editingLesson.video);
       } else {
         console.log("No video file provided or invalid file type.");
@@ -119,7 +130,10 @@ const CourseEditPage = () => {
       await fetchCourse();
       alert("Lesson updated successfully!");
       setEditingLesson(null);
-      
+  
+      // auto-uncheck the checkbox after editing is done:
+      setRemoveVideoChecked(false);
+
     } catch (error) {
       console.error("Error updating lesson:", error.response?.data || error.message);
       alert("Failed to update lesson. Check console for details.");
@@ -127,6 +141,7 @@ const CourseEditPage = () => {
     }
   };
 
+  
   // Delete a lesson
   const handleDeleteLesson = async (lessonId) => {
     const accessToken = localStorage.getItem('accessToken');
@@ -149,14 +164,25 @@ const CourseEditPage = () => {
     }
   };
 
+ // fetch categories from the backend
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get("/api/categories/"); // adjust if your URL is different
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   useEffect(() => {
     fetchCourse();
+    fetchCategories();
   }, [id]);
 
   if (loading) {
     return <p>Loading...</p>;
   }
+ 
 
   return (
     <div>
@@ -164,6 +190,8 @@ const CourseEditPage = () => {
         <p>Loading...</p> // Replace this with a spinner component for better UX
       ) : (
         <>
+
+          {/* edit course title, description, thumbnail and category */}
           <h1>Edit Course</h1>
           <input
             type="text"
@@ -179,8 +207,36 @@ const CourseEditPage = () => {
             value={course.price}
             onChange={(e) => setCourse({ ...course, price: e.target.value })}
           />
+          <select
+            value={course.category || ""}
+            onChange={(e) => setCourse({ ...course, category: e.target.value })}
+          >
+            <option value="">Select category</option>
+            {categories.map((cat) => (
+              <option key={cat.value} value={cat.value}>
+                {cat.label}
+              </option>
+            ))}
+          </select>
+          <div>
+            <label htmlFor="thumbnail">Thumbnail:</label>
+            <input
+              type="file"
+              id="thumbnail"
+              accept="image/*"
+              onChange={(e) => setThumbnail(e.target.files[0])}
+            />
+            {/* Preview existing thumbnail */}
+            {course.thumbnail && (
+              <div>
+                <p>Current Thumbnail:</p>
+                <img src={course.thumbnail} alt="Course thumbnail" style={{ maxWidth: '200px' }} />
+              </div>
+            )}
+          </div>
           <button onClick={handleSaveCourse}>Save Course</button>
 
+          {/* showing lessons with edit and delete button  */}
           <div>
             <h2>Lessons</h2>
             {course.lessons.map((lesson) => (
@@ -203,6 +259,7 @@ const CourseEditPage = () => {
             ))}
           </div>
 
+          {/* editing lesson */}
           {editingLesson ? (
             <div>
               <h3>Edit Lesson</h3>
@@ -227,10 +284,17 @@ const CourseEditPage = () => {
                   setEditingLesson({ ...editingLesson, video: e.target.files[0] })
                 }
               />
+              <label htmlFor="remove_video">Remove Video</label>
+              <input
+                type="checkbox"
+                id="remove_video"
+                onChange={(e) => setRemoveVideoChecked(e.target.checked)}></input>
               <button onClick={handleEditLesson}>Save Lesson</button>
               <button onClick={() => setEditingLesson(null)}>Cancel</button>
             </div>
           ) : (
+
+            // Add lesson form
             <div>
               <h3>Add Lesson</h3>
               <input

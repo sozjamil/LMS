@@ -33,7 +33,16 @@ from rest_framework import serializers
 class IsInstructor(BasePermission):
     def has_permission(self, request, view):
         return hasattr(request.user, 'profile') and request.user.profile.role == 'instructor'
-    
+
+#view for showing categories so I don't have to rewrite them in the frontend
+class CategoryChoicesView(APIView):
+    def get(self, request):
+        categories = [
+            {'value': key, 'label': label}
+            for key, label in Course.CATEGORY_CHOICES
+        ]
+        return Response(categories)
+        
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -162,7 +171,8 @@ class LessonCreateView(APIView):
         title = request.data.get('title')
         content = request.data.get('content')
         video = request.FILES.get('video')
-        is_enrolled = Course.students.filter(id=request.user.id).exists()
+        course = Course.objects.get(pk=course_id)
+        is_enrolled = course.students.filter(id=request.user.id).exists()
        
         video_url = None
         # Upload video to S3
@@ -179,7 +189,7 @@ class LessonCreateView(APIView):
             video_url=video_url,# this will be None if no video
         )
 
-        serializer = LessonSerializer(lesson, many=True, context={
+        serializer = LessonSerializer(lesson, context={
             'request': request,
             'enrolled': is_enrolled,
         })
@@ -207,7 +217,11 @@ class LessonUpdateView(RetrieveUpdateDestroyAPIView):
 
             # Handle video file upload
             video_file = request.FILES.get('video')
-            if video_file:
+            remove_video = request.data.get('remove_video') == 'true'
+            
+            if remove_video:
+                lesson.video_url = None  # just clear it
+            elif video_file:
                 file_name = f'{lesson.course.id}/{video_file.name}'
                 try:
                     video_url = upload_to_s3(video_file, settings.AWS_STORAGE_BUCKET_NAME, file_name)
