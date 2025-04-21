@@ -3,23 +3,28 @@ import React, { useEffect, useState } from "react";
 import api from "../utils/api";
 import ProfilePictureUpload from './ProfilePictureUpload';
 import { useNavigate } from "react-router-dom";
+import useAuth from '../context/AuthContext';
 
 const UserProfilePage = () => {
   const [user, setUser] = useState(null);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate(); // Get the navigate function
+  const { refreshUser } = useAuth();
   
   // fetch user profile data from the API
   const fetchProfile = async () => {
     try {
       const response = await api.get("/api/profile/");
       setUser(response.data);
+      // Call refreshUser to update the user context 
+      await refreshUser();
     } catch (error) {
       setError("Failed to fetch profile. Please try again later.");
       console.error("Failed to fetch profile:", error);
     }
   };
+  
   //Fetch when component loads
   useEffect(() => {
     fetchProfile();

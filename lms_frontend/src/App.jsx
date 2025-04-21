@@ -14,13 +14,16 @@ import CourseEditPage from './pages/CourseEditPage';
 import UserProfilePage from './pages/UserProfilePage';
 import Logout from './pages/logout';
 import MyCoursesPage from'./pages/MyCoursesPage.jsx'
-// Step 13: Course Reviews
+import { Toaster } from 'react-hot-toast';
+
 
 function App() {
   const { user } = useAuth();
   console.log('User:', user); // Debugging user value
 
   return (
+    <>
+      <Toaster />
       <div>
         <Navbar /> 
 
@@ -43,11 +46,9 @@ function App() {
           
           {/* 404 fallback */}
           <Route path="*" element={<div>Page not found</div>} />
-
-
-
         </Routes>
       </div>
+    </>
   );
 }
 

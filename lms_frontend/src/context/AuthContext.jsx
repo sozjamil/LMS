@@ -21,6 +21,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [accessToken]); 
   
+  // Function to fetch user profile data
   const fetchUserProfile = async (token) => {
       try {
         const response = await fetch('http://localhost:8000/api/profile/', {
@@ -56,8 +57,16 @@ export const AuthProvider = ({ children }) => {
     navigate('/login'); // optional redirect
   };
 
+  // Function to refresh user profile 
+  const refreshUser = async () => {
+    if (accessToken) {
+      await fetchUserProfile(accessToken);
+    }
+  };
+  
+
   return (
-    <AuthContext.Provider value={{ accessToken, user, isAuthenticated: !!accessToken, login, logout }}>
+    <AuthContext.Provider value={{ accessToken, user, isAuthenticated: !!accessToken, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

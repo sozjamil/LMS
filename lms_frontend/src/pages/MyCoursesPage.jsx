@@ -33,7 +33,7 @@ const MyCoursesPage = () => {
         <ul>
           {courses.map(course => (
             <li key={course.id}>
-              <button onClick={() => navigate(`/courses/${course.id}`)}>
+              <button onClick={() => navigate(`/course/${course.id}/`)}>
                 {course.thumbnail && (
                   <img
                     src={course.thumbnail}

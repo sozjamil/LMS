@@ -37,7 +37,7 @@ export default function ProfilePictureUpload({ onUploadSuccess }) {
       setUploadMessage('Image uploaded successfully!');
             
       // Call parent to refresh profile data
-      if (response.status === 200 && onUploadSuccess) {
+      if (res.status === 200 && onUploadSuccess) {
         onUploadSuccess();
      }
     } catch (error) {

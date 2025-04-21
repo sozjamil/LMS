@@ -202,9 +202,10 @@ class LessonUpdateView(RetrieveUpdateDestroyAPIView):
     queryset = Lesson.objects.all()  
     serializer_class = LessonSerializer  
     
-    def put(self, request, lesson_id):
+    # RetrieveUpdateDestroyAPIView expects the URL parameter to be named pk (because lookup_field = 'pk' by default
+    def put(self, request, pk):
         try:
-            lesson = Lesson.objects.get(id=lesson_id)
+            lesson = Lesson.objects.get(id=pk)
             is_enrolled = Enrollment.objects.filter(student=request.user, course=lesson.course).exists()
             
 

@@ -1,18 +1,16 @@
-// This is instructor's course management page where they can view, delete, and publish/unpublish their courses.
 import React, { useEffect, useState } from 'react';
-import api from '../utils/api';  // Assuming this is your axios instance
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const CourseManagementPage = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Get the navigate function
+  const navigate = useNavigate();
 
-  // fetch instructor's courses
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await api.get('/api/instructor/courses/');  // Fetch instructor's courses
+        const response = await api.get('/api/instructor/courses/');
         setCourses(response.data);
       } catch (error) {
         console.error('Error fetching courses:', error);
@@ -24,38 +22,26 @@ const CourseManagementPage = () => {
     fetchCourses();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  const handleEditCourse = (id) => navigate(`/manage/course/${id}`);
 
-  // Handles course by clicking on it redirects to edit page
-  const handleEditCourse = (courseId) => {
-    navigate(`/manage/course/${courseId}`);
-  };
-  
-  // Handles course deletion
-  const handleDeleteCourse = async (courseId) => {
+  const handleDeleteCourse = async (id) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
       try {
-        await api.delete(`/api/instructor/courses/${courseId}/delete/`);
-        // Remove the course from state
-        setCourses(prevCourses => prevCourses.filter(course => course.id !== courseId));
+        await api.delete(`/api/instructor/courses/${id}/delete/`);
+        setCourses(prev => prev.filter(c => c.id !== id));
       } catch (error) {
         console.error('Error deleting course:', error);
         alert('Something went wrong while deleting the course.');
       }
     }
   };
-  
-  // Handles publish/unpublish course
-  const handleTogglePublish = async (courseId) => {
+
+  const handleTogglePublish = async (id) => {
     try {
-      const response = await api.post(`/api/instructor/courses/${courseId}/toggle-publish/`);
-      const updatedStatus = response.data.published;
-  
-      // Update the state to reflect the new status
-      setCourses(prevCourses =>
-        prevCourses.map(course =>
-          course.id === courseId ? { ...course, published: updatedStatus } : course
-        )
+      const res = await api.post(`/api/instructor/courses/${id}/toggle-publish/`);
+      const updated = res.data.published;
+      setCourses(prev =>
+        prev.map(c => (c.id === id ? { ...c, published: updated } : c))
       );
     } catch (error) {
       console.error('Error toggling publish status:', error);
@@ -63,42 +49,78 @@ const CourseManagementPage = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="text-center py-10 text-gray-600 text-lg">
+        Loading your courses...
+      </div>
+    );
+  }
+
+  if (courses.length === 0) {
+    return (
+      <div className="text-center py-10 text-gray-500">
+        You haven't created any courses yet.
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1>Instructor Courses</h1>
-      <ul>
+    <div className="max-w-6xl mx-auto px-4 py-10">
+      <h1 className="text-3xl font-bold mb-8 text-indigo-600">Your Courses</h1>
+
+      <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {courses.map(course => (
-          <li key={course.id}>
-            <button onClick={() => handleEditCourse(course.id)}>
-            {course.thumbnail && (
-                <img
-                  src={course.thumbnail}
-                  alt="Course Cover"
-                  style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', marginBottom: '1rem' }}
-                /> 
+          <div
+            key={course.id}
+            className="bg-white shadow-lg rounded-xl overflow-hidden flex flex-col"
+          >
+            {course.thumbnail ? (
+              <img
+                src={course.thumbnail}
+                alt="Course thumbnail"
+                className="h-48 w-full object-cover"
+              />
+            ) : (
+              <div className="h-48 bg-gray-200 flex items-center justify-center text-gray-500">
+                No Thumbnail
+              </div>
             )}
-            {course.title}
-            </button>
-            <p>{course.description}</p>
 
-            {/* Add button deleting */}
-            <button
-              onClick={() => handleDeleteCourse(course.id)}
-              style={{ color: 'red', marginTop: '10px' }}
-            >
-              Delete course
-            </button>
+            <div className="p-4 flex flex-col flex-grow">
+              <h2 className="text-xl font-semibold text-gray-800">{course.title}</h2>
+              <p className="text-gray-600 mt-2 line-clamp-3">{course.description}</p>
 
-            {/* Add button to publish/unpublish course */}
-            <button
-              onClick={() => handleTogglePublish(course.id)}
-              style={{ color: course.published ? 'green' : 'gray', marginTop: '10px', marginLeft: '10px' }}
-            >
-              {course.published ? 'Unpublish' : 'Publish'}
-            </button>
-          </li>
+              <div className="mt-auto pt-4 space-y-2">
+                <button
+                  onClick={() => handleEditCourse(course.id)}
+                  className="w-full py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
+                >
+                  Edit Course
+                </button>
+
+                <div className="flex justify-between items-center space-x-2">
+                  <button
+                    onClick={() => handleDeleteCourse(course.id)}
+                    className="w-full py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                  >
+                    Delete
+                  </button>
+
+                  <button
+                    onClick={() => handleTogglePublish(course.id)}
+                    className={`w-full py-2 rounded-md transition text-white ${
+                      course.published ? 'bg-gray-600 hover:bg-gray-700' : 'bg-green-600 hover:bg-green-700'
+                    }`}
+                  >
+                    {course.published ? 'Unpublish' : 'Publish'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

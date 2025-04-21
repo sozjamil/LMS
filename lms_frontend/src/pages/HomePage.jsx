@@ -52,9 +52,17 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-50 px-4 sm:px-8">
       {/* Hero Section */}
-      <div className="text-center py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg mb-12">
+      <div className="text-center py-16 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg mb-12 mt-10 relative">
         <h1 className="text-4xl sm:text-5xl font-bold mb-4">Welcome to Your Learning Hub</h1>
         <p className="text-lg sm:text-xl">Discover new skills, gain certificates, and level up your career</p>
+         {/* Transparent Image */}
+          <div className="absolute inset-0">
+            <img
+              src="https://static.wixstatic.com/media/65246d_c7bd3ba476fb4191af59a11494ad027f~mv2.jpg/v1/fill/w_820,h_460,al_c,q_85/65246d_c7bd3ba476fb4191af59a11494ad027f~mv2.jpg"  // Replace with your image URL
+              alt="Learning Hub"
+              className="w-full h-full object-cover opacity-30"  // Adjust opacity for transparency
+            />
+          </div>
       </div>
 
       {/* Search */}

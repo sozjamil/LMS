@@ -92,8 +92,11 @@ class CourseSerializer(serializers.ModelSerializer):
         instance.description = validated_data.get('description', instance.description)
         instance.price = validated_data.get('price', instance.price)
         instance.published = validated_data.get('published', instance.published)
-        instance.category = validated_data.get('category', instance.category)  # ✅ Add this line
+        instance.category = validated_data.get('category', instance.category)  
+        instance.thumbnail = validated_data.get('thumbnail', instance.thumbnail)  
 
+        # if 'thumbnail' in validated_data:
+        #         instance.thumbnail = validated_data['thumbnail']
         instance.save()
 
         # Update lessons

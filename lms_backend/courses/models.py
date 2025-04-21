@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from .storage_backends import PublicMediaStorage, PublicProfilePicStorage, PublicThumbnailStorage
 
 # user: soz password:Soz12345678
 # admin:Admin12345678
@@ -14,7 +15,7 @@ class Profile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
-    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    profile_picture = models.ImageField(storage=PublicProfilePicStorage(),upload_to='', null=True, blank=True)
 
     def __str__(self):
         return self.user.username
@@ -48,7 +49,7 @@ class Course(models.Model):
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     students = models.ManyToManyField(User, through='Enrollment', related_name='enrolled_courses')
-    thumbnail = models.ImageField(upload_to='course_thumbnails/', blank=True, null=True)
+    thumbnail = models.ImageField( storage=PublicThumbnailStorage(),upload_to='', blank=True, null=True)
     category = models.CharField(max_length=100,choices=CATEGORY_CHOICES, default='programming')
 
     def __str__(self):
