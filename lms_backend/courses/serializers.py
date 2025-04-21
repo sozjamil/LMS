@@ -29,10 +29,11 @@ class TokenSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source='profile.role', read_only=True)
     profile_picture = serializers.ImageField(source='profile.profile_picture', read_only=True)
+    bio = serializers.CharField(source='profile.bio', allow_blank=True, required=False)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'password', 'role', 'profile_picture']
+        fields = ['id', 'username', 'email', 'password', 'role', 'profile_picture', 'bio']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data): 
@@ -46,13 +47,35 @@ class UserSerializer(serializers.ModelSerializer):
 
         return user
 
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        password = validated_data.pop('password', None)
+       
+        # Update user fields
+        for attr, value in validated_data.items():
+           setattr(instance, attr, value)
+
+        # Handle password change
+        if password:
+            instance.set_password(password)
+        instance.save()
+
+        # Update other fields if needed    
+        profile = instance.profile
+        for attr, value in profile_data.items():
+            setattr(profile, attr, value)
+        profile.save()
+
+        return instance
+    
 class PublicUserSerializer(serializers.ModelSerializer):
     profile_picture = serializers.ImageField(source='profile.profile_picture', read_only=True)
     role = serializers.CharField(source='profile.role', read_only=True)
+    bio = serializers.CharField(source='profile.bio', read_only=True)  # Include bio here
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'profile_picture', 'role']
+        fields = ['id', 'username', 'profile_picture', 'role', 'bio']  # Include bio here
 
     
 class LessonSerializer(serializers.ModelSerializer): 

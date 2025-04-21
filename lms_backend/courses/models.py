@@ -16,6 +16,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')
     profile_picture = models.ImageField(storage=PublicProfilePicStorage(),upload_to='', null=True, blank=True)
+    bio = models.TextField(null=True, blank=True)  # Added bio field
 
     def __str__(self):
         return self.user.username
