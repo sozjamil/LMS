@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import CategoryChoicesView, CourseDetailView, CourseList, CourseReviewListCreateView, EnrollInCourseView, EnrolledCoursesView, InstructorCourseDeleteView, InstructorCoursesView, LessonList, CreateCourseView, LessonCreateView, LessonUpdateView, ProfilePictureUploadView, ToggleCoursePublishView, UserProfileView
-from .views import RegisterUserView
+from .views import RegisterUserView, instructor_stats
 from rest_framework_simplejwt.views import  TokenRefreshView #, TokenObtainPairView
 from .views import CustomTokenObtainPairView 
 
@@ -19,6 +19,8 @@ urlpatterns = [
     # Adding “My Courses” path for instructors
     path('instructor/courses/', InstructorCoursesView.as_view(), name='instructor-courses'),
     path('instructor/courses/<int:course_id>/delete/', InstructorCourseDeleteView.as_view(), name='instructor-course-delete'),
+    path('instructor-stats/', instructor_stats, name='instructor-stats'),
+    
     # Adding “Publish/Unpublish” path for instructors 
     path('instructor/courses/<int:course_id>/toggle-publish/', ToggleCoursePublishView.as_view()),
     

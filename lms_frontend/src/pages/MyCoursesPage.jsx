@@ -22,31 +22,38 @@ const MyCoursesPage = () => {
     fetchCourses();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return <div className="p-6 text-center text-gray-600">Loading...</div>;
+  }
 
   return (
-    <div>
-      <h1>My Enrolled Courses</h1>
+    <div className="max-w-6xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">My Courses</h1>
+
       {courses.length === 0 ? (
-        <p>You are not enrolled in any courses yet.</p>
+        <p className="text-center text-gray-500">You are not enrolled in any courses yet.</p>
       ) : (
-        <ul>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map(course => (
-            <li key={course.id}>
-              <button onClick={() => navigate(`/course/${course.id}/`)}>
-                {course.thumbnail && (
-                  <img
-                    src={course.thumbnail}
-                    alt="Course Cover"
-                    style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', marginBottom: '1rem' }}
-                  />
-                )}
-              {course.title}
-              </button>
-              <p>{course.description}</p>
-            </li>
+            <div
+              key={course.id}
+              onClick={() => navigate(`/course/${course.id}/`)}
+              className="cursor-pointer bg-white rounded-xl shadow hover:shadow-md transition duration-300 overflow-hidden"
+            >
+              {course.thumbnail && (
+                <img
+                  src={course.thumbnail}
+                  alt={course.title}
+                  className="w-full h-40 object-cover"
+                />
+              )}
+              <div className="p-4 space-y-2">
+                <h2 className="text-xl font-semibold text-purple-700">{course.title}</h2>
+                <p className="text-gray-600 text-sm line-clamp-3">{course.description}</p>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

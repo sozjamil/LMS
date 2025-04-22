@@ -15,11 +15,12 @@ import UserProfilePage from './pages/UserProfilePage';
 import Logout from './pages/logout';
 import MyCoursesPage from'./pages/MyCoursesPage.jsx'
 import { Toaster } from 'react-hot-toast';
+import StudentCourseView from './pages/StudentCourseView';
+import Layout from './components/Layout'; // import Layout component
 
 
 function App() {
   const { user } = useAuth();
-  console.log('User:', user); // Debugging user value
 
   return (
     <>
@@ -28,24 +29,27 @@ function App() {
         <Navbar /> 
 
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/course/:id" element={<CoursePage />} />
-          <Route path="/login" element={<LoginPage />} />        
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/course/:id" element={<CoursePage />} />
+            <Route path="/login" element={<LoginPage />} />        
 
-          <Route element={<ProtectedRoute />}> 
-            <Route path="/profile" element={<UserProfilePage /> }/>
-            <Route path="/my-courses" element={<MyCoursesPage />} />
+            <Route element={<ProtectedRoute />}> 
+              <Route path="/profile" element={<UserProfilePage /> }/>
+              <Route path="/my-courses" element={<MyCoursesPage />} />
+              <Route path="/courses/:id/learn" element={<StudentCourseView />} />
+              
+              <Route path="/create-course" element={<CreateCoursePage />} />
+              <Route path="/manage-courses" element={<CourseManagementPage />} />
+              <Route path="/manage/course/:id" element={<CourseEditPage />} />
+              <Route path="/logout" element={<Logout />} />
+            </Route> 
+
+            <Route path="/register" element={<Register />} />
             
-            <Route path="/create-course" element={<CreateCoursePage />} />
-            <Route path="/manage-courses" element={<CourseManagementPage />} />
-            <Route path="/manage/course/:id" element={<CourseEditPage />} />
-            <Route path="/logout" element={<Logout />} />
-          </Route> 
-
-          <Route path="/register" element={<Register />} />
-          
-          {/* 404 fallback */}
-          <Route path="*" element={<div>Page not found</div>} />
+            {/* 404 fallback */}
+            <Route path="*" element={<div>Page not found</div>} />
+          </Route>
         </Routes>
       </div>
     </>

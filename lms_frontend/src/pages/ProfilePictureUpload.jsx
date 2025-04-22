@@ -32,7 +32,6 @@ export default function ProfilePictureUpload({ onUploadSuccess }) {
       });
       
       const data = await res.json();
-      console.log('Uploaded profile picture:', data.profile_picture);
       alert('Profile picture uploaded successfully!');
       setUploadMessage('Image uploaded successfully!');
             

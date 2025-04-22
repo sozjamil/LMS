@@ -20,9 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-eokv0!3a*)k8hsb$)4ky*ufbq_ekkmquw7!ob&%#r1f-!np+qy'
+
+import os
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+DJANGO_SECRET_KEY='your-secret-key-here'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -64,8 +67,7 @@ AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with same name
 AWS_DEFAULT_ACL = 'public-read'         # Make files public by default 
 AWS_QUERYSTRING_AUTH = False   # Remove ?AWSAccessKeyId=... from URLs
 
-import storages.backends.s3boto3
-print("HARD TEST", storages.backends.s3boto3.S3Boto3Storage)
+
 
 MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 
@@ -179,7 +181,7 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),  # Short lifespan for access token
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),  # Short lifespan for access token
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Longer lifespan for refresh token
     'ROTATE_REFRESH_TOKENS': True,  # Issue new refresh token on refresh
     'BLACKLIST_AFTER_ROTATION': True,  # Blacklist old refresh tokens

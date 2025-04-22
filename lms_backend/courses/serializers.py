@@ -39,7 +39,6 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data): 
         role = validated_data.pop('role', 'student') # default to 'student' if not provided
         user = User.objects.create_user(**validated_data)
-        print("User created with validated data:", validated_data) # testing
 
         # Check if a Profile already exists before creating one
         if not hasattr(user, 'profile'):
@@ -95,7 +94,6 @@ class LessonSerializer(serializers.ModelSerializer):
         if not enrolled and user != instance.course.instructor:
             data['content'] = None
             data['video_url'] = None
-            print("Lesson hidden for user:", user) #test
 
         return data
     

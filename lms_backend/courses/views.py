@@ -28,6 +28,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from rest_framework.generics import RetrieveUpdateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import serializers
 
 class IsInstructor(BasePermission):
@@ -68,7 +69,6 @@ class CreateCourseView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated, IsInstructor]
 
     def perform_create(self, serializer):
-        print(self.request.headers)  # Log headers to verify the Authorization header  
         # Automatically set the instructor to the authenticated user
         serializer.save(instructor=self.request.user)
 
@@ -77,16 +77,12 @@ class RegisterUserView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        print("Request Data:", request.data)
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
-            print("Validated Data:", serializer.validated_data)
             try:
                 user = serializer.save()
-                print("User created successfully:", user)
 
                 role = request.data.get('role', 'student')
-                print("Role from request:", role)
 
                 # Check if a Profile already exists
                 if not hasattr(user, 'profile'):
@@ -201,7 +197,7 @@ class LessonUpdateView(RetrieveUpdateDestroyAPIView):
     parser_classes = [MultiPartParser, FormParser]
     queryset = Lesson.objects.all()  
     serializer_class = LessonSerializer  
-    
+
     # RetrieveUpdateDestroyAPIView expects the URL parameter to be named pk (because lookup_field = 'pk' by default
     def put(self, request, pk):
         try:
@@ -355,3 +351,19 @@ class ToggleCoursePublishView(APIView):
             return Response({'published': course.published}, status=status.HTTP_200_OK)
         except Course.DoesNotExist:
             return Response({'error': 'Course not found or unauthorized.'}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def instructor_stats(request):
+    user = request.user
+    if user.profile.role != 'instructor':
+        return Response({'detail': 'Not authorized'}, status=403)
+
+    courses = Course.objects.filter(instructor=user)
+    total_courses = courses.count()
+    total_enrollments = Enrollment.objects.filter(course__in=courses).count()
+
+    return Response({
+        'total_courses': total_courses,
+        'total_enrollments': total_enrollments,
+    })

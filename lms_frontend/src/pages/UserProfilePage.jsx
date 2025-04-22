@@ -12,12 +12,12 @@ const UserProfilePage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
+  const [instructorStats, setInstructorStats] = useState(null);
 
   // Fetch user profile data from the API
   const fetchProfile = async () => {
     try {
       const response = await api.get("/api/profile/");
-      console.log("Profile data:", response.data); // 👀 Check if email is there
       setUser(response.data);
       setName(response.data.username);  // Set the name
       setBio(response.data.bio || "");  // Set the bio if available
@@ -29,9 +29,23 @@ const UserProfilePage = () => {
     }
   };
 
+  // Fetch instructor stats if the user is an instructor
+  const fetchInstructorStats = async () => {
+    try {
+      const response = await api.get("/api/instructor-stats/");
+      setInstructorStats(response.data);
+    } catch (error) {
+      console.error("Failed to fetch instructor stats:", error);
+    }
+  };
+
   // Fetch when component loads
   useEffect(() => {
     fetchProfile();
+    // Check if the user is an instructor and fetch stats
+    if (user && user.role === "instructor") {
+      fetchInstructorStats();
+    }
   }, []);
 
   // Handle profile update
@@ -183,6 +197,21 @@ const UserProfilePage = () => {
           <div className="text-center text-slate-500 animate-pulse">Loading profile...</div>
         )}
       </div>
+      {user?.role === 'instructor' && instructorStats && (
+        <div className="bg-slate-50 p-6 rounded-xl shadow-inner space-y-2">
+          <h2 className="text-xl font-semibold text-slate-800 mb-2">Instructor Analytics</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg p-4 shadow text-center">
+              <p className="text-lg font-bold text-indigo-600">{instructorStats.total_courses}</p>
+              <p className="text-gray-600">Courses Created</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 shadow text-center">
+              <p className="text-lg font-bold text-emerald-600">{instructorStats.total_enrollments}</p>
+              <p className="text-gray-600">Total Enrollments</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
   

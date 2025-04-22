@@ -4,8 +4,6 @@ from django.conf import settings
 
 def upload_to_s3(file, bucket_name, file_name):
     try:
-        print(f"Uploading {file_name} to bucket {bucket_name}...")
-
         # Create an S3 client
         s3 = boto3.client(
             's3',
