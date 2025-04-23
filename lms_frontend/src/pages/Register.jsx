@@ -19,6 +19,8 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // console.log('Form data before submit:', formData); // Debug print
+    
 
     if (!formData.role) {
       setError('Please select a role.');
@@ -26,13 +28,37 @@ const Register = () => {
     }
 
     try {
-      const response = await api.post('/api/register/', formData);
+      // Construct the payload based on the selected role, to send the data from the frontend in that structure
+      const payload = {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: formData.role,
+        
+      };
+      
+      console.log("Payload before submit:", payload); // helpful for debugging
+      
+      const response = await api.post('/api/register/', payload);      
       toast.success('Registration successful!');
       console.log('Registration successful:', response.data); //test
       navigate('/login');
-    } catch (err) {
-      console.error('Registration error:', err.response?.data || err.message);
-      setError(err.response?.data?.error || 'Registration failed. Try again.');
+      
+    } catch (error) {
+
+      const errors = error.response?.data;
+      
+      if (errors?.username?.[0]?.includes("already exists")) {
+        toast.error("Username is already taken.");
+      } else if (errors?.email?.[0]?.includes("already registered")) {
+        toast.error("Email is already registered.");
+      } else if (errors?.error) {
+        toast.error(errors.error);
+      } else {
+        toast.error("Something went wrong. Try again.");
+      }
+
+      console.error("Registration error:", errors);
     }
   };
 

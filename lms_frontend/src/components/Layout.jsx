@@ -14,7 +14,7 @@ const Layout = () => {
 
       {/* Footer */}
       <footer className="bg-indigo-600 text-white text-center py-4 mt-6">
-        <p>&copy; 2025 Inc. All rights reserved.</p>
+        <p>&copy; 2025 CodeSpace All rights reserved.</p>
       </footer>
     </div>
   );

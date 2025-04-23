@@ -4,6 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from rest_framework import serializers
 from .models import Course, Lesson, Profile, Enrollment, Review
+from rest_framework.validators import UniqueValidator
 
 # TokenObtainPairSerializer is the default serializer used by Django REST to handle login 
 # and return: access token, refresh token
@@ -27,7 +28,11 @@ class TokenSerializer(serializers.Serializer):
     
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.CharField(source='profile.role', read_only=True)
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all(), message="Email is already registered.")]
+    )
+    role = serializers.CharField(source='profile.role')
     profile_picture = serializers.ImageField(source='profile.profile_picture', read_only=True)
     bio = serializers.CharField(source='profile.bio', allow_blank=True, required=False)
 
@@ -36,8 +41,10 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'password', 'role', 'profile_picture', 'bio']
         extra_kwargs = {'password': {'write_only': True}}
 
-    def create(self, validated_data): 
-        role = validated_data.pop('role', 'student') # default to 'student' if not provided
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        role = profile_data.get('role', 'student')  # Default role is 'student'
+        
         user = User.objects.create_user(**validated_data)
 
         # Check if a Profile already exists before creating one

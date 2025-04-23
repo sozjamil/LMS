@@ -77,6 +77,10 @@ class RegisterUserView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        # Create a mutable copy of request.data
+        # data = request.data.copy()
+        # print("Processed data before serializer:", data)  # Debug print
+
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             try:
@@ -95,7 +99,7 @@ class RegisterUserView(APIView):
             except IntegrityError as e:
                 print("Database IntegrityError:", e)
                 traceback.print_exc()
-                return Response({"error": "A profile already exists for this user."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "A user with that username or email already exists"}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
                 print("Error during user/profile creation:", e)
                 traceback.print_exc()
