@@ -36,7 +36,7 @@ const CoursePage = () => {
   }, [id]);
 
   const handleEnroll = async () => {
-    if (!user) {
+    if (!isAuthenticated) {
       navigate('/login', { state: { from: location.pathname } });
       return;
     }
@@ -140,7 +140,7 @@ const CoursePage = () => {
           </div>
         )}
 
-        {isEnrolled && !hasReviewed && (
+        {isEnrolled && !hasReviewed && user?.id !== course.instructor.id && (
           <form onSubmit={handleReviewSubmit} className="mt-6 space-y-3">
             <h3 className="text-base font-semibold">Leave a Review</h3>
             <div>

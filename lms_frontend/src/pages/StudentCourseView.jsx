@@ -82,7 +82,7 @@ const StudentCourseView = () => {
                 className="w-full rounded-xl shadow"
               />
             ) : (
-              <p className="italic text-red-500">No video available</p>
+              <p className="italic text-red-500"></p>
             )}
             <p className="text-gray-700 mt-4">{selectedLesson.content}</p>
           </>

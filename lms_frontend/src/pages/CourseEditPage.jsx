@@ -76,6 +76,7 @@ const CourseEditPage = () => {
   };
 
   const handleEditLesson = async () => {
+    setLessonLoading(true);
     const accessToken = localStorage.getItem("accessToken");
     try {
       const formData = new FormData();
@@ -102,6 +103,8 @@ const CourseEditPage = () => {
     } catch (error) {
       console.error("Error updating lesson:", error);
       toast.error("Failed to update lesson.");
+    }finally {
+      setLessonLoading(false);
     }
   };
 
@@ -268,7 +271,12 @@ const CourseEditPage = () => {
               Remove Video
             </label>
             <div className="space-x-2">
-              <button onClick={handleEditLesson} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Save Lesson</button>
+              <button onClick={handleEditLesson} 
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                disabled={lessonLoading}
+                 >
+                {lessonLoading ? "Uploading..." : "Save Lesson"}
+              </button>
               <button onClick={() => setEditingLesson(null)} className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Cancel</button>
             </div>
           </div>
