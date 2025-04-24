@@ -18,6 +18,7 @@ import { Toaster } from 'react-hot-toast';
 import StudentCourseView from './pages/StudentCourseView';
 import Layout from './components/Layout'; // import Layout component
 
+import RoleProtectedRoute from './components/RoleProtectedRoute'; // Import the RoleProtectedRoute component
 
 function App() {
   const { user } = useAuth();
@@ -37,12 +38,14 @@ function App() {
             <Route element={<ProtectedRoute />}> 
               <Route path="/profile" element={<UserProfilePage /> }/>
               <Route path="/my-courses" element={<MyCoursesPage />} />
-              <Route path="/courses/:id/learn" element={<StudentCourseView />} />
-              
-              <Route path="/create-course" element={<CreateCoursePage />} />
-              <Route path="/manage-courses" element={<CourseManagementPage />} />
-              <Route path="/manage/course/:id" element={<CourseEditPage />} />
+              <Route path="/courses/:id/learn" element={<StudentCourseView />} />  
               <Route path="/logout" element={<Logout />} />
+
+              <Route element={<RoleProtectedRoute allowedRoles={['instructor']} />}>
+                <Route path="/create-course" element={<CreateCoursePage />} />
+                <Route path="/manage-courses" element={<CourseManagementPage />} />
+                <Route path="/manage/course/:id" element={<CourseEditPage />} />
+              </Route>
             </Route> 
 
             <Route path="/register" element={<Register />} />

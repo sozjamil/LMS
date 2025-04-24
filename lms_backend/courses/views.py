@@ -132,6 +132,8 @@ class CourseDetailView(APIView):
             )
         
             course_data = serializer.data
+            course_data['is_enrolled'] = enrolled 
+
 
             # If not enrolled, hide content and videos
             if not enrolled and course.instructor != request.user:

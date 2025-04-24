@@ -22,8 +22,7 @@ const CoursePage = () => {
       try {
         const response = await api.get(`/api/courses/${id}`);
         setCourse(response.data);
-        const hasContent = response.data.lessons?.[0]?.content !== 'Enroll to see the content';
-        setIsEnrolled(hasContent);
+        setIsEnrolled(response.data.is_enrolled);
         const reviewsRes = await api.get(`/api/courses/${id}/reviews/`);
         setReviews(reviewsRes.data);
       } catch (err) {
