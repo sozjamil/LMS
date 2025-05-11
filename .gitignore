@@ -1,3 +1,10 @@
 # Ignore .env file
 .env
 venv/
+
+node_modules/
+dist/
+build/
+.next/
+*.min.js
+*.min.css
