@@ -8,3 +8,6 @@ build/
 .next/
 *.min.js
 *.min.css
+
+# Ignore static files
+staticfiles/
