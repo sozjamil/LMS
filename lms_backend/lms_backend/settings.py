@@ -101,8 +101,9 @@ MIDDLEWARE = [
 
     'django.middleware.security.SecurityMiddleware',
     #  allows Django to efficiently serve static files (like CSS/JS)
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add this line
+    'whitenoise.middleware.WhiteNoiseMiddleware',  
 
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
