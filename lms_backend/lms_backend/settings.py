@@ -84,7 +84,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Allow CORS for your frontend
 CORS_ALLOWED_ORIGINS = [
     "https://codespace-t4xo.onrender.com",
-    "http://localhost:5173",  # React frontend
+      # "http://localhost:5173",React frontend
 ]
 # Application definition
 
