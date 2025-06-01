@@ -32,7 +32,7 @@ DJANGO_SECRET_KEY='your-secret-key-here'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost','your-app.onrender.com', 'your-domain.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost',  'codespace-uq5o.onrender.com']
 
 # Media Files on S3
 INSTALLED_APPS = [
