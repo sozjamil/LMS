@@ -128,11 +128,11 @@ WSGI_APPLICATION = 'lms_backend.wsgi.application'
 DATABASES = {
     'default': {
        'ENGINE': 'django.db.backends.mysql',
-       'NAME': 'lms_db',
-       'USER': 'lms_user',
-       'PASSWORD': '12345678',
-       'HOST': 'localhost',
-       'PORT': '3306', # Default MySQL port
+       'NAME': os.environ.get('MYSQL_DATABASE'),
+       'USER': os.environ.get('MYSQL_USER'),
+       'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
+       'HOST': os.environ.get('MYSQL_HOST'),
+       'PORT': os.environ.get('MYSQL_PORT', '3306'),
        'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
