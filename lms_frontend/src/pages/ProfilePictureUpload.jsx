@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import useAuth from '../context/AuthContext';
+import API_BASE_URL from '../config';
 
+const BASE_URL = API_BASE_URL;
 export default function ProfilePictureUpload({ onUploadSuccess }) {
   const { accessToken } = useAuth();
   const [file, setFile] = useState(null);
@@ -23,7 +25,7 @@ export default function ProfilePictureUpload({ onUploadSuccess }) {
 
     try {
       setUploading(true);
-      const res = await fetch('http://localhost:8000/api/profile/upload-picture/', {
+      const res = await fetch(`${BASE_URL}/api/profile/upload-picture/`, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${accessToken}`,
