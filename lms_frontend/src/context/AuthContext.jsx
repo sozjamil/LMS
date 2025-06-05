@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../config';
 
 const AuthContext = createContext();
+const BASE_URL = API_BASE_URL;
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ export const AuthProvider = ({ children }) => {
   // Function to fetch user profile data
   const fetchUserProfile = async (token) => {
       try {
-        const response = await fetch('http://localhost:8000/api/profile/', {
+        const response = await fetch(`${BASE_URL}/api/profile/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
