@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { refreshToken } from './auth';
-import API_BASE_URL from "./config";
+import { refreshToken } from '../auth';
+import API_BASE_URL from "../config";
 
 
 const BASE_URL = API_BASE_URL;
