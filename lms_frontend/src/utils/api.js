@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { refreshToken } from '../auth';
+import { refreshToken } from './auth';
 import API_BASE_URL from "../config";
 
 
